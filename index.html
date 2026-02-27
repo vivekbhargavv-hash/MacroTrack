@@ -15,12 +15,10 @@
         .profile-btn { flex: 1; padding: 12px; border-radius: 14px; border: 1px solid var(--border); background: white; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.3s; }
         .profile-btn.active { background: var(--primary); color: white; border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
 
-        /* Dashboard */
+        /* Dashboard & Macro Bars */
         .dash-title { font-size: 11px; font-weight: 800; color: var(--gray); text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; }
         .main-progress { height: 16px; background: #e2e8f0; border-radius: 20px; overflow: hidden; margin-bottom: 15px; border: 1px solid #ddd; }
         .main-bar { height: 100%; background: linear-gradient(90deg, #4f46e5, #818cf8); transition: width 0.8s ease; width: 0%; }
-        
-        /* Macro Grids */
         .macro-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
         .macro-stat { padding: 10px; border-radius: 16px; background: #f8fafc; text-align: center; border: 1px solid var(--border); }
         .macro-stat small { font-size: 9px; font-weight: 800; color: var(--gray); display: block; margin-bottom: 4px; }
@@ -28,23 +26,30 @@
         .mini-progress { height: 4px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
         .mini-bar { height: 100%; transition: width 0.8s ease; }
 
+        /* RESTORED: Meal Selector & Text Input Styles */
+        .meal-selector { display: flex; gap: 6px; margin-bottom: 16px; background: #f1f5f9; padding: 4px; border-radius: 14px; }
+        .meal-selector label { flex: 1; text-align: center; padding: 8px 2px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
+        .meal-selector input { display: none; }
+        .meal-selector input:checked + label { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        input[type="text"] { width: 100%; padding: 16px; border: 2px solid var(--border); border-radius: 16px; font-size: 16px; box-sizing: border-box; outline: none; }
+        
+        /* Buttons */
+        .btn-main { width: 100%; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 700; font-size: 16px; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
+        .btn-cam { background: #64748b; }
+
         /* Quick Add */
         .quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; }
         .quick-btn { background: white; border: 1px solid var(--border); padding: 8px; border-radius: 12px; font-size: 11px; font-weight: 600; cursor: pointer; }
 
-        /* Report & Insights Overlay */
+        /* Overlays */
         #overlay-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
         .chart-container { display: flex; align-items: flex-end; justify-content: space-around; height: 150px; margin: 20px 0; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
         .chart-bar { width: 20px; background: var(--primary); border-radius: 4px 4px 0 0; min-height: 2px; }
         .insight-card { background: #eff6ff; padding: 15px; border-radius: 16px; border-left: 4px solid var(--primary); margin-top: 15px; font-size: 13px; line-height: 1.5; }
-
-        /* Input Styles */
-        .meal-selector { display: flex; gap: 4px; margin-bottom: 12px; background: #f1f5f9; padding: 4px; border-radius: 12px; }
-        .meal-selector label { flex: 1; text-align: center; padding: 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
-        .meal-selector input:checked + label { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .btn-main { width: 100%; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 700; margin-top: 10px; }
-        .history-item { padding: 12px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 8px; background: white; display: flex; justify-content: space-between; align-items: center; }
         #goal-panel { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:3000; align-items:center; justify-content:center; }
+        
+        .history-item { padding: 12px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 8px; background: white; display: flex; justify-content: space-between; align-items: center; }
+        .qty-btn { background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 10px; font-weight: bold; font-size: 18px; }
     </style>
 </head>
 <body>
@@ -94,15 +99,15 @@
 
     <div class="card">
         <div class="meal-selector">
-            <input type="radio" name="meal" id="r-br" value="Breakfast"><label for="r-br">BRKFST</label>
-            <input type="radio" name="meal" id="r-lu" value="Lunch" checked><label for="r-lu">LUNCH</label>
-            <input type="radio" name="meal" id="r-di" value="Dinner"><label for="r-di">DINNER</label>
-            <input type="radio" name="meal" id="r-sn" value="Snack"><label for="r-sn">SNACK</label>
+            <input type="radio" name="meal" id="r-br" value="Breakfast"><label for="r-br">Breakfast</label>
+            <input type="radio" name="meal" id="r-lu" value="Lunch" checked><label for="r-lu">Lunch</label>
+            <input type="radio" name="meal" id="r-di" value="Dinner"><label for="r-di">Dinner</label>
+            <input type="radio" name="meal" id="r-sn" value="Snack"><label for="r-sn">Snack</label>
         </div>
-        <input type="text" id="foodInput" placeholder="What did you eat?">
-        <div style="display:flex; gap:8px; margin-top:10px;">
+        <input type="text" id="foodInput" placeholder="Describe your meal...">
+        <div style="display:flex; gap:10px; margin-top:12px;">
             <input type="file" id="camInput" accept="image/*" capture="environment" style="display:none" onchange="processInput(true)">
-            <button class="btn-main" style="background:#64748b; flex:1; margin:0" onclick="document.getElementById('camInput').click()">📷 Photo</button>
+            <button class="btn-main btn-cam" style="flex:1; margin:0" onclick="document.getElementById('camInput').click()">📷 Photo</button>
             <button class="btn-main" style="flex:2; margin:0" onclick="processInput(false)">Analyze & Log</button>
         </div>
         
@@ -112,22 +117,20 @@
             <button class="quick-btn" onclick="quickAdd('Boiled Egg', 6, 1, 5, 70)">🥚 Egg</button>
             <button class="quick-btn" onclick="quickAdd('Apple', 0, 25, 0, 95)">🍎 Apple</button>
         </div>
-        <div id="loader" style="display:none; text-align:center; padding:10px; font-weight:bold; color:var(--primary);">AI is thinking...</div>
+        <div id="loader" style="display:none; text-align:center; padding:15px; font-weight:bold; color:var(--primary);">AI Analyzing...</div>
     </div>
 
     <div id="history-list"></div>
+    <button onclick="clearData()" style="width:100%; border:none; background:none; color:#ef4444; font-size:12px; padding:20px 0;">Reset Today's Entries</button>
 
     <div id="overlay-view">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <h2 id="report-title" style="margin:0">Reports</h2>
             <button onclick="toggleOverlay(false)" style="padding:8px 15px; border-radius:10px; border:none; background:#f1f5f9; font-weight:bold;">Close</button>
         </div>
-        
-        <h4 style="margin-bottom:5px; margin-top:25px;">Last 7 Days (Calories)</h4>
+        <h4 style="margin-bottom:5px; margin-top:25px;">Weekly Calories</h4>
         <div id="weekly-chart" class="chart-container"></div>
-        
-        <h4 style="margin-bottom:5px;">Daily Insight</h4>
-        <div id="daily-insight" class="insight-card">Log more meals to see AI insights!</div>
+        <div id="daily-insight" class="insight-card">Loading insights...</div>
     </div>
 
     <script>
@@ -230,10 +233,12 @@
             });
 
             const todayList = history.filter(m => m.date === today);
-            document.getElementById('history-list').innerHTML = todayList.map(m => `
+            document.getElementById('history-list').innerHTML = todayList.length === 0 ? 
+                `<p style="text-align:center; color:gray; padding:20px;">No meals for ${currentUser} today.</p>` :
+                todayList.map(m => `
                 <div class="history-item">
                     <div><b>${m.name}</b><br><small>${m.type} • ${Math.round(m.cal * (m.scale || 1))} kcal</small></div>
-                    <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
                         <button class="qty-btn" onclick="updateScale(${m.id}, -0.5)">-</button>
                         <b>${m.scale}</b>
                         <button class="qty-btn" onclick="updateScale(${m.id}, 0.5)">+</button>
@@ -287,11 +292,16 @@
         function updateInsights(tots, goals) {
             const diff = goals.cal - tots.cal;
             let msg = "";
-            if(diff > 500) msg = `You have <b>${Math.round(diff)} kcal</b> left. A high-protein snack would help hit your ${goals.p}g target!`;
-            else if (diff > 0) msg = "Almost there! Keep an eye on the fats to stay within limits.";
-            else msg = "Goal reached! Great job tracking today. Focus on hydration now.";
+            if(diff > 500) msg = `You have <b>${Math.round(diff)} kcal</b> left. Try hitting your ${goals.p}g protein goal!`;
+            else if (diff > 0) msg = "Great pacing! You're nearly at your daily limit.";
+            else msg = "Target reached! Focus on recovery and hydration now.";
             document.getElementById('daily-insight').innerHTML = msg;
         }
+
+        function clearData() { if(confirm("Reset logs?")) { 
+            userData[currentUser].history = (userData[currentUser].history || []).filter(m => m.date !== new Date().toLocaleDateString()); 
+            db.ref('users/' + currentUser + '/history').set(userData[currentUser].history); 
+        } }
     </script>
 </body>
 </html>
