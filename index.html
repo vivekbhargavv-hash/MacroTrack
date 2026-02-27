@@ -103,7 +103,6 @@
             <h2 style="margin:0">Performance</h2>
             <button onclick="toggleOverlay(false)" style="padding:8px 15px; border-radius:10px; border:none; background:#f1f5f9; font-weight:bold;">Close</button>
         </div>
-        <h4 style="margin-bottom:25px; margin-top:25px;">Weekly Macro Split</h4>
         <div id="weekly-chart" class="chart-container"></div>
         <div id="daily-insight" class="insight-card">Calculating...</div>
     </div>
@@ -151,16 +150,17 @@
 
             document.getElementById('loader').style.display = 'block';
             
-            // Try different fallback models for 2026
-            const models = ['gemini-1.5-flash', 'gemini-1.5-pro']; 
+            // 2026 Stable Models & Endpoints
+            const models = ['gemini-3-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite']; 
             let success = false;
             let lastErr = "";
 
             for (const mName of models) {
                 if (success) break;
                 try {
-                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${mName}:generateContent?key=${GEMINI_KEY}`;
-                    let contents = [{ parts: [{ text: `Respond with JSON only: {"name":"Item","p":number,"c":number,"f":number,"cal":number}. Estimate for: ${text || 'food image'}` }] }];
+                    // Using STABLE v1 endpoint for 2026
+                    const url = `https://generativelanguage.googleapis.com/v1/models/${mName}:generateContent?key=${GEMINI_KEY}`;
+                    let contents = [{ parts: [{ text: `Return JSON only: {"name":"Item","p":number,"c":number,"f":number,"cal":number}. Estimate for: ${text || 'food image'}` }] }];
 
                     if (isPhoto && file) {
                         const b64 = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result.split(',')[1]); rd.readAsDataURL(file); });
@@ -179,15 +179,12 @@
                             success = true;
                         }
                     } else if (data.error) { 
-                        lastErr = `${data.error.code}: ${data.error.message}`;
+                        lastErr = `(${mName}) ${data.error.message}`;
                     }
                 } catch (e) { lastErr = e.message; }
             }
 
-            if(!success) {
-                console.error("AI Error Detail:", lastErr);
-                alert("AI Processing Failed. If it says '403 Forbidden', please ensure 'Generative Language API' is enabled in your Google Cloud Console.");
-            }
+            if(!success) alert("AI Error: " + lastErr);
             document.getElementById('foodInput').value = '';
             document.getElementById('loader').style.display = 'none';
         }
