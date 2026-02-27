@@ -11,11 +11,9 @@
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; padding-bottom: 90px; }
         .card { background: var(--card); padding: 16px; border-radius: 24px; border: 1px solid var(--border); margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         
-        /* Header & Profile */
         .profile-btn { flex: 1; padding: 12px; border-radius: 14px; border: 1px solid var(--border); background: white; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.3s; }
         .profile-btn.active { background: var(--primary); color: white; border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
 
-        /* Dashboard & Macro Bars */
         .dash-title { font-size: 11px; font-weight: 800; color: var(--gray); text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; }
         .main-progress { height: 16px; background: #e2e8f0; border-radius: 20px; overflow: hidden; margin-bottom: 15px; border: 1px solid #ddd; }
         .main-bar { height: 100%; background: linear-gradient(90deg, #4f46e5, #818cf8); transition: width 0.8s ease; width: 0%; }
@@ -26,22 +24,18 @@
         .mini-progress { height: 4px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
         .mini-bar { height: 100%; transition: width 0.8s ease; }
 
-        /* RESTORED: Meal Selector & Text Input Styles */
         .meal-selector { display: flex; gap: 6px; margin-bottom: 16px; background: #f1f5f9; padding: 4px; border-radius: 14px; }
         .meal-selector label { flex: 1; text-align: center; padding: 8px 2px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
         .meal-selector input { display: none; }
         .meal-selector input:checked + label { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         input[type="text"] { width: 100%; padding: 16px; border: 2px solid var(--border); border-radius: 16px; font-size: 16px; box-sizing: border-box; outline: none; }
         
-        /* Buttons */
         .btn-main { width: 100%; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 700; font-size: 16px; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
         .btn-cam { background: #64748b; }
 
-        /* Quick Add */
         .quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; }
-        .quick-btn { background: white; border: 1px solid var(--border); padding: 8px; border-radius: 12px; font-size: 11px; font-weight: 600; cursor: pointer; }
+        .quick-btn { background: white; border: 1px solid var(--border); padding: 8px; border-radius: 12px; font-size: 10px; font-weight: 600; cursor: pointer; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* Overlays */
         #overlay-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
         .chart-container { display: flex; align-items: flex-end; justify-content: space-around; height: 150px; margin: 20px 0; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
         .chart-bar { width: 20px; background: var(--primary); border-radius: 4px 4px 0 0; min-height: 2px; }
@@ -79,30 +73,18 @@
         <div class="dash-title"><span id="user-display">VIV</span><span id="cal-text">0 / 2000</span></div>
         <div class="main-progress"><div id="cal-bar" class="main-bar"></div></div>
         <div class="macro-row">
-            <div class="macro-stat">
-                <small>PROTEIN</small>
-                <b id="txt-p">0/150g</b>
-                <div class="mini-progress"><div id="bar-p" class="mini-bar" style="background:var(--p-color)"></div></div>
-            </div>
-            <div class="macro-stat">
-                <small>CARBS</small>
-                <b id="txt-c">0/200g</b>
-                <div class="mini-progress"><div id="bar-c" class="mini-bar" style="background:var(--c-color)"></div></div>
-            </div>
-            <div class="macro-stat">
-                <small>FATS</small>
-                <b id="txt-f">0/70g</b>
-                <div class="mini-progress"><div id="bar-f" class="mini-bar" style="background:var(--f-color)"></div></div>
-            </div>
+            <div class="macro-stat"><small>PROTEIN</small><b id="txt-p">0/150g</b><div class="mini-progress"><div id="bar-p" class="mini-bar" style="background:var(--p-color)"></div></div></div>
+            <div class="macro-stat"><small>CARBS</small><b id="txt-c">0/200g</b><div class="mini-progress"><div id="bar-c" class="mini-bar" style="background:var(--c-color)"></div></div></div>
+            <div class="macro-stat"><small>FATS</small><b id="txt-f">0/70g</b><div class="mini-progress"><div id="bar-f" class="mini-bar" style="background:var(--f-color)"></div></div></div>
         </div>
     </div>
 
     <div class="card">
         <div class="meal-selector">
-            <input type="radio" name="meal" id="r-br" value="Breakfast"><label for="r-br">Breakfast</label>
-            <input type="radio" name="meal" id="r-lu" value="Lunch" checked><label for="r-lu">Lunch</label>
-            <input type="radio" name="meal" id="r-di" value="Dinner"><label for="r-di">Dinner</label>
-            <input type="radio" name="meal" id="r-sn" value="Snack"><label for="r-sn">Snack</label>
+            <input type="radio" name="meal" id="r-br" value="Breakfast" onchange="updateQuickAdd()"><label for="r-br">Breakfast</label>
+            <input type="radio" name="meal" id="r-lu" value="Lunch" checked onchange="updateQuickAdd()"><label for="r-lu">Lunch</label>
+            <input type="radio" name="meal" id="r-di" value="Dinner" onchange="updateQuickAdd()"><label for="r-di">Dinner</label>
+            <input type="radio" name="meal" id="r-sn" value="Snack" onchange="updateQuickAdd()"><label for="r-sn">Snack</label>
         </div>
         <input type="text" id="foodInput" placeholder="Describe your meal...">
         <div style="display:flex; gap:10px; margin-top:12px;">
@@ -110,13 +92,7 @@
             <button class="btn-main btn-cam" style="flex:1; margin:0" onclick="document.getElementById('camInput').click()">📷 Photo</button>
             <button class="btn-main" style="flex:2; margin:0" onclick="processInput(false)">Analyze & Log</button>
         </div>
-        
-        <div class="quick-grid">
-            <button class="quick-btn" onclick="quickAdd('Whey Protein', 25, 2, 1, 120)">🥤 Whey</button>
-            <button class="quick-btn" onclick="quickAdd('Black Coffee', 0, 0, 0, 2)">☕ Coffee</button>
-            <button class="quick-btn" onclick="quickAdd('Boiled Egg', 6, 1, 5, 70)">🥚 Egg</button>
-            <button class="quick-btn" onclick="quickAdd('Apple', 0, 25, 0, 95)">🍎 Apple</button>
-        </div>
+        <div id="quick-grid" class="quick-grid"></div>
         <div id="loader" style="display:none; text-align:center; padding:15px; font-weight:bold; color:var(--primary);">AI Analyzing...</div>
     </div>
 
@@ -151,10 +127,25 @@
         let currentUser = 'Viv';
         let userData = {};
 
+        const QUICK_MEALS = {
+            'Breakfast': [ {n:'Egg', p:6, c:1, f:5, cal:70}, {n:'Idli', p:2, c:15, f:0, cal:60}, {n:'Dosa', p:3, c:25, f:4, cal:150}, {n:'Poori', p:2, c:18, f:8, cal:150} ],
+            'Lunch': [ {n:'Rice', p:3, c:45, f:0, cal:200}, {n:'Poriyal', p:2, c:10, f:5, cal:100}, {n:'Chicken curry', p:25, c:5, f:12, cal:250}, {n:'Curd', p:4, c:5, f:4, cal:100} ],
+            'Dinner': [ {n:'Protein shake', p:25, c:3, f:1, cal:120}, {n:'Chapati', p:3, c:18, f:1, cal:90}, {n:'Paneer fry', p:18, c:4, f:20, cal:280}, {n:'Curd', p:4, c:5, f:4, cal:100} ],
+            'Snack': [ {n:'Whey', p:25, c:2, f:1, cal:120}, {n:'Yogurt', p:8, c:12, f:0, cal:80}, {n:'Almond', p:6, c:6, f:14, cal:160}, {n:'Protein bar', p:20, c:25, f:7, cal:220} ]
+        };
+
         db.ref('users').on('value', (snap) => {
             userData = snap.val() || {};
             renderUI();
         });
+
+        function updateQuickAdd() {
+            const cat = document.querySelector('input[name="meal"]:checked').value;
+            const meals = QUICK_MEALS[cat];
+            document.getElementById('quick-grid').innerHTML = meals.map(m => 
+                `<button class="quick-btn" onclick="saveMeal('${m.n}', ${m.p}, ${m.c}, ${m.f}, ${m.cal}, '${cat}')">${m.n}</button>`
+            ).join('');
+        }
 
         function switchUser(name) {
             currentUser = name;
@@ -169,10 +160,8 @@
             const type = document.querySelector('input[name="meal"]:checked').value;
             if(!text && !isPhoto) return;
             document.getElementById('loader').style.display = 'block';
-
             const models = ['gemini-3-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-flash'];
             let success = false;
-
             for (const mName of models) {
                 if (success) break;
                 try {
@@ -196,11 +185,6 @@
             document.getElementById('loader').style.display = 'none';
         }
 
-        function quickAdd(name, p, c, f, cal) {
-            const type = document.querySelector('input[name="meal"]:checked').value;
-            saveMeal(name, p, c, f, cal, type);
-        }
-
         function saveMeal(name, p, c, f, cal, type) {
             if(!userData[currentUser]) userData[currentUser] = { history: [], goals: {p:150, c:200, f:70, cal:2000} };
             const item = { id: Date.now(), name, p, c, f, cal, type, scale: 1, date: new Date().toLocaleDateString() };
@@ -214,37 +198,21 @@
             const u = userData[currentUser];
             const today = new Date().toLocaleDateString();
             let tots = {p:0, c:0, f:0, cal:0};
-            
             const history = u.history || [];
-            history.forEach(m => { 
-                if(m.date === today) { ['p','c','f','cal'].forEach(k => { tots[k] += (Number(m[k]) * (Number(m.scale) || 1)); }); }
-            });
-
+            history.forEach(m => { if(m.date === today) { ['p','c','f','cal'].forEach(k => { tots[k] += (Number(m[k]) * (Number(m.scale) || 1)); }); } });
             document.getElementById('user-display').innerText = currentUser.toUpperCase();
             const g = u.goals;
             document.getElementById('cal-bar').style.width = Math.min(100, (tots.cal / g.cal) * 100) + '%';
             document.getElementById('cal-text').innerText = `${Math.round(tots.cal)} / ${g.cal}`;
-
             ['p','c','f'].forEach(k => {
                 const consumed = Math.round(tots[k]);
-                const target = g[k];
-                document.getElementById(`txt-${k}`).innerText = `${consumed}/${target}g`;
-                document.getElementById(`bar-${k}`).style.width = Math.min(100, (consumed / target) * 100) + '%';
+                document.getElementById(`txt-${k}`).innerText = `${consumed}/${g[k]}g`;
+                document.getElementById(`bar-${k}`).style.width = Math.min(100, (consumed / g[k]) * 100) + '%';
             });
-
             const todayList = history.filter(m => m.date === today);
-            document.getElementById('history-list').innerHTML = todayList.length === 0 ? 
-                `<p style="text-align:center; color:gray; padding:20px;">No meals for ${currentUser} today.</p>` :
-                todayList.map(m => `
-                <div class="history-item">
-                    <div><b>${m.name}</b><br><small>${m.type} • ${Math.round(m.cal * (m.scale || 1))} kcal</small></div>
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <button class="qty-btn" onclick="updateScale(${m.id}, -0.5)">-</button>
-                        <b>${m.scale}</b>
-                        <button class="qty-btn" onclick="updateScale(${m.id}, 0.5)">+</button>
-                    </div>
-                </div>`).join('');
-            
+            document.getElementById('history-list').innerHTML = todayList.length === 0 ? `<p style="text-align:center; color:gray; padding:20px;">No meals for ${currentUser} today.</p>` :
+                todayList.map(m => `<div class="history-item"><div><b>${m.name}</b><br><small>${m.type} • ${Math.round(m.cal * (m.scale || 1))} kcal</small></div><div style="display:flex; align-items:center; gap:8px;"><button class="qty-btn" onclick="updateScale(${m.id}, -0.5)">-</button><b>${m.scale}</b><button class="qty-btn" onclick="updateScale(${m.id}, 0.5)">+</button></div></div>`).join('');
+            updateQuickAdd();
             updateInsights(tots, g);
         }
 
@@ -255,53 +223,32 @@
         }
 
         function updateGoals() {
-            userData[currentUser].goals = { 
-                cal: parseInt(document.getElementById('goal-cal').value), 
-                p: parseInt(document.getElementById('goal-p').value), 
-                c: parseInt(document.getElementById('goal-c').value), 
-                f: parseInt(document.getElementById('goal-f').value) 
-            };
+            userData[currentUser].goals = { cal: parseInt(document.getElementById('goal-cal').value), p: parseInt(document.getElementById('goal-p').value), c: parseInt(document.getElementById('goal-c').value), f: parseInt(document.getElementById('goal-f').value) };
             db.ref('users/' + currentUser).set(userData[currentUser]);
             document.getElementById('goal-panel').style.display = 'none';
         }
 
-        function toggleOverlay(show) { 
-            document.getElementById('overlay-view').style.display = show ? 'block' : 'none'; 
-            if(show) renderReport();
-        }
+        function toggleOverlay(show) { document.getElementById('overlay-view').style.display = show ? 'block' : 'none'; if(show) renderReport(); }
 
         function renderReport() {
             const chart = document.getElementById('weekly-chart');
             const u = userData[currentUser];
             const dates = [];
-            for(let i=6; i>=0; i--) {
-                const d = new Date(); d.setDate(d.getDate() - i);
-                dates.push(d.toLocaleDateString());
-            }
+            for(let i=6; i>=0; i--) { const d = new Date(); d.setDate(d.getDate() - i); dates.push(d.toLocaleDateString()); }
             chart.innerHTML = dates.map(d => {
-                let daySum = 0;
-                if(u.history) u.history.forEach(h => { if(h.date === d) daySum += (h.cal * h.scale); });
+                let daySum = 0; if(u.history) u.history.forEach(h => { if(h.date === d) daySum += (h.cal * h.scale); });
                 const h = Math.min(100, (daySum / u.goals.cal) * 100);
-                return `<div style="display:flex; flex-direction:column; align-items:center; flex:1;">
-                    <div class="chart-bar" style="height:${h * 1.2}px; background:${daySum > u.goals.cal ? '#f43f5e' : 'var(--primary)'}"></div>
-                    <span style="font-size:8px; color:var(--gray); margin-top:5px;">${d.split('/')[0]}/${d.split('/')[1]}</span>
-                </div>`;
+                return `<div style="display:flex; flex-direction:column; align-items:center; flex:1;"><div class="chart-bar" style="height:${h * 1.2}px; background:${daySum > u.goals.cal ? '#f43f5e' : 'var(--primary)'}"></div><span style="font-size:8px; color:var(--gray); margin-top:5px;">${d.split('/')[0]}/${d.split('/')[1]}</span></div>`;
             }).join('');
         }
 
         function updateInsights(tots, goals) {
             const diff = goals.cal - tots.cal;
-            let msg = "";
-            if(diff > 500) msg = `You have <b>${Math.round(diff)} kcal</b> left. Try hitting your ${goals.p}g protein goal!`;
-            else if (diff > 0) msg = "Great pacing! You're nearly at your daily limit.";
-            else msg = "Target reached! Focus on recovery and hydration now.";
+            let msg = diff > 500 ? `You have <b>${Math.round(diff)} kcal</b> left. Try hitting your ${goals.p}g protein goal!` : (diff > 0 ? "Great pacing! You're nearly at your daily limit." : "Target reached! Focus on recovery and hydration now.");
             document.getElementById('daily-insight').innerHTML = msg;
         }
 
-        function clearData() { if(confirm("Reset logs?")) { 
-            userData[currentUser].history = (userData[currentUser].history || []).filter(m => m.date !== new Date().toLocaleDateString()); 
-            db.ref('users/' + currentUser + '/history').set(userData[currentUser].history); 
-        } }
+        function clearData() { if(confirm("Reset logs?")) { userData[currentUser].history = (userData[currentUser].history || []).filter(m => m.date !== new Date().toLocaleDateString()); db.ref('users/' + currentUser + '/history').set(userData[currentUser].history); } }
     </script>
 </body>
 </html>
