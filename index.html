@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MacroTrack: Viv & Avi</title>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="[https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js](https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js)"></script>
+    <script src="[https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js](https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js)"></script>
     <style>
         :root { --primary: #4f46e5; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --gray: #64748b; --border: #e2e8f0; --p-color: #6366f1; --c-color: #10b981; --f-color: #f59e0b; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; padding-bottom: 90px; }
@@ -31,10 +31,10 @@
         .quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; }
         .quick-btn { background: white; border: 1px solid var(--border); padding: 8px 4px; border-radius: 12px; font-size: 10px; font-weight: 600; cursor: pointer; text-align: center; }
         #overlay-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .chart-container { display: flex; align-items: flex-end; justify-content: space-around; height: 120px; margin: 20px 0 60px 0; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+        .chart-container { display: flex; align-items: flex-end; justify-content: space-around; height: 120px; margin: 20px 0 70px 0; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
         .chart-bar { width: 25px; background: var(--primary); border-radius: 4px 4px 0 0; min-height: 2px; position: relative; }
         .bar-label { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: bold; color: var(--text); }
-        .macro-labels { position: absolute; bottom: -55px; left: 50%; transform: translateX(-50%); font-size: 8px; white-space: nowrap; line-height: 1.2; text-align: center; }
+        .macro-labels { position: absolute; bottom: -65px; left: 50%; transform: translateX(-50%); font-size: 8px; white-space: nowrap; line-height: 1.2; text-align: center; }
         #goal-panel { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:3000; align-items:center; justify-content:center; }
         .history-item { padding: 12px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 8px; background: white; display: flex; justify-content: space-between; align-items: center; }
         .macro-badge { font-size: 10px; color: var(--gray); font-family: monospace; margin-top: 2px; }
@@ -82,7 +82,7 @@
                 <input type="radio" name="meal" id="r-di" value="Dinner" onchange="updateQuickAdd()"><label for="r-di">Dinner</label>
                 <input type="radio" name="meal" id="r-sn" value="Snack" onchange="updateQuickAdd()"><label for="r-sn">Snack</label>
             </div>
-            <input type="text" id="foodInput" placeholder="Describe your meal (e.g. 2 eggs and toast)">
+            <input type="text" id="foodInput" placeholder="2 eggs, coffee, rice chicken...">
             <div style="display:flex; gap:10px; margin-top:12px;">
                 <input type="file" id="camInput" accept="image/*" capture="environment" style="display:none" onchange="processInput(true)">
                 <button type="button" class="btn-main btn-cam" style="flex:1; margin:0" onclick="document.getElementById('camInput').click()">📷 Photo</button>
@@ -90,7 +90,7 @@
             </div>
         </form>
         <div id="quick-grid" class="quick-grid"></div>
-        <div id="loader" style="display:none; text-align:center; padding:15px; font-weight:bold; color:var(--primary);">AI Analyzing...</div>
+        <div id="loader" style="display:none; text-align:center; padding:15px; font-weight:bold; color:var(--primary);">Analyzing Nutrition...</div>
     </div>
 
     <div id="history-list"></div>
@@ -98,12 +98,12 @@
 
     <div id="overlay-view">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h2 id="report-title" style="margin:0">Reports</h2>
+            <h2 style="margin:0">Performance</h2>
             <button onclick="toggleOverlay(false)" style="padding:8px 15px; border-radius:10px; border:none; background:#f1f5f9; font-weight:bold;">Close</button>
         </div>
-        <h4 style="margin-bottom:25px; margin-top:25px;">Weekly Performance</h4>
+        <h4 style="margin-bottom:25px; margin-top:25px;">Weekly Macro Split</h4>
         <div id="weekly-chart" class="chart-container"></div>
-        <div id="daily-insight" class="insight-card" style="margin-top:20px;">Loading insights...</div>
+        <div id="daily-insight" class="insight-card">Calculating...</div>
     </div>
 
     <script>
@@ -112,7 +112,7 @@
         const firebaseConfig = {
             apiKey: "AIzaSyAFsD_ryAIQ_bZPgLBaCwgX_-_hs6Vc388",
             authDomain: "macrotrack-42d94.firebaseapp.com",
-            databaseURL: "https://macrotrack-42d94-default-rtdb.firebaseio.com",
+            databaseURL: "[https://macrotrack-42d94-default-rtdb.firebaseio.com](https://macrotrack-42d94-default-rtdb.firebaseio.com)",
             projectId: "macrotrack-42d94",
             storageBucket: "macrotrack-42d94.firebasestorage.app",
             messagingSenderId: "1081766952227",
@@ -147,34 +147,38 @@
             if(!text && !isPhoto) return;
 
             document.getElementById('loader').style.display = 'block';
-            // 2026 stable model endpoints
-            const models = ['gemini-3.1-flash', 'gemini-3-flash-preview', 'gemini-2.5-flash'];
+            const models = ['gemini-1.5-flash', 'gemini-1.5-pro']; // High reliability for 2026
             let success = false;
+            let lastErr = "";
 
             for (const mName of models) {
                 if (success) break;
                 try {
                     const url = `https://generativelanguage.googleapis.com/v1beta/models/${mName}:generateContent?key=${GEMINI_KEY}`;
-                    let parts = [{ text: `Respond ONLY with a JSON object: {"name":"ItemName","p":number,"c":number,"f":number,"cal":number}. Estimate macros for: ${text || 'the food in this image'}` }];
-                    
+                    let prompt = `Return JSON ONLY: {"name":"Item","p":number,"c":number,"f":number,"cal":number}. Estimate for: ${text || 'food image'}`;
+                    let contents = [{ parts: [{ text: prompt }] }];
+
                     if (isPhoto && file) {
                         const b64 = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result.split(',')[1]); rd.readAsDataURL(file); });
-                        parts.push({ inline_data: { mime_type: file.type, data: b64 } });
+                        contents[0].parts.push({ inline_data: { mime_type: file.type, data: b64 } });
                     }
 
-                    const resp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts }] }) });
+                    const resp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents }) });
                     const data = await resp.json();
                     
                     if (data.candidates && data.candidates[0].content.parts[0].text) {
                         const raw = data.candidates[0].content.parts[0].text;
-                        const cleanJson = JSON.parse(raw.substring(raw.indexOf('{'), raw.lastIndexOf('}') + 1));
-                        saveMeal(cleanJson.name, cleanJson.p, cleanJson.c, cleanJson.f, cleanJson.cal, type);
-                        success = true;
-                    }
-                } catch (e) { console.warn(`Model ${mName} failed, trying next...`, e); }
+                        const match = raw.match(/\{.*\}/s);
+                        if (match) {
+                            const json = JSON.parse(match[0]);
+                            saveMeal(json.name, json.p, json.c, json.f, json.cal, type);
+                            success = true;
+                        }
+                    } else if (data.error) { lastErr = data.error.message; }
+                } catch (e) { lastErr = e.message; }
             }
 
-            if(!success) alert("AI failed to process. Check your API key or internet.");
+            if(!success) alert("AI Error: " + lastErr);
             document.getElementById('foodInput').value = '';
             document.getElementById('loader').style.display = 'none';
         }
@@ -213,7 +217,7 @@
             });
 
             const todayList = history.filter(m => m.date === today);
-            document.getElementById('history-list').innerHTML = todayList.length === 0 ? `<p style="text-align:center; color:gray; padding:20px;">No meals logged today.</p>` :
+            document.getElementById('history-list').innerHTML = todayList.length === 0 ? `<p style="text-align:center; color:gray; padding:20px;">No meals logged yet.</p>` :
                 todayList.map(m => `
                 <div class="history-item">
                     <div>
@@ -262,14 +266,14 @@
                         <span style="color:var(--c-color)">C:${Math.round(s.c)}</span><br>
                         <span style="color:var(--f-color)">F:${Math.round(s.f)}</span>
                     </div>
-                    <span style="position:absolute; bottom:-75px; left:50%; transform:translateX(-50%); font-size:8px; color:var(--gray); font-weight:bold;">${d.split('/')[0]}/${d.split('/')[1]}</span>
+                    <span style="position:absolute; bottom:-90px; left:50%; transform:translateX(-50%); font-size:8px; color:var(--gray); font-weight:bold;">${d.split('/')[0]}/${d.split('/')[1]}</span>
                 </div>`;
             }).join('');
         }
 
         function updateInsights(tots, goals) {
             const diff = goals.cal - tots.cal;
-            let msg = diff > 500 ? `You have <b>${Math.round(diff)} kcal</b> left. Try hitting your ${goals.p}g protein goal!` : (diff > 0 ? "Great pacing! You're nearly at your daily limit." : "Target reached! Focus on recovery and hydration now.");
+            let msg = diff > 500 ? `Left: <b>${Math.round(diff)} kcal</b>. Eat more protein!` : (diff > 0 ? "On track!" : "Goal met!");
             document.getElementById('daily-insight').innerHTML = msg;
         }
 
