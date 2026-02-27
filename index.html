@@ -9,7 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 
     <style>
-        :root { --primary: #4f46e5; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --gray: #64748b; --border: #e2e8f0; --p-color: #6366f1; --c-color: #10b981; --f-color: #f59e0b; }
+        :root { --primary: #4f46e5; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --gray: #64748b; --border: #e2e8f0; --p-color: #6366f1; --c-color: #10b981; --f-color: #f59e0b; --success: #22c55e; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; padding-bottom: 90px; }
         .card { background: var(--card); padding: 16px; border-radius: 24px; border: 1px solid var(--border); margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .profile-btn { flex: 1; padding: 12px; border-radius: 14px; border: 1px solid var(--border); background: white; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.3s; }
@@ -29,18 +29,16 @@
         .meal-selector input:checked + label { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         input[type="text"] { width: 100%; padding: 16px; border: 2px solid var(--border); border-radius: 16px; font-size: 16px; box-sizing: border-box; outline: none; }
         .btn-main { width: 100%; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 700; font-size: 16px; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
-        .btn-cam { background: #64748b; }
         .quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; }
-        .quick-btn { background: white; border: 1px solid var(--border); padding: 8px 4px; border-radius: 12px; font-size: 10px; font-weight: 600; cursor: pointer; text-align: center; }
+        .quick-btn { background: white; border: 1px solid var(--border); padding: 8px 4px; border-radius: 12px; font-size: 10px; font-weight: 600; cursor: pointer; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .insight-box { font-size: 13px; line-height: 1.5; color: var(--text); background: #eff6ff; padding: 12px; border-radius: 16px; border-left: 4px solid var(--primary); margin-top: 10px; }
         #overlay-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .chart-container { display: flex; align-items: flex-end; justify-content: space-around; height: 120px; margin: 20px 0 80px 0; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
-        .chart-bar { width: 25px; background: var(--primary); border-radius: 4px 4px 0 0; min-height: 2px; position: relative; }
-        .bar-label { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: bold; color: var(--text); }
-        .macro-labels { position: absolute; bottom: -65px; left: 50%; transform: translateX(-50%); font-size: 8px; white-space: nowrap; line-height: 1.2; text-align: center; }
-        #goal-panel { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:3000; align-items:center; justify-content:center; }
+        .chart-container { display: flex; align-items: flex-end; justify-content: space-around; height: 140px; margin: 30px 0 60px 0; border-bottom: 2px solid var(--border); }
+        .chart-bar { width: 30px; background: var(--primary); border-radius: 6px 6px 0 0; min-height: 2px; position: relative; cursor: pointer; }
+        .chart-bar.goal-met { background: var(--success); }
+        .bar-label { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: bold; }
         .history-item { padding: 12px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 8px; background: white; display: flex; justify-content: space-between; align-items: center; }
-        .macro-badge { font-size: 10px; color: var(--gray); font-family: monospace; margin-top: 2px; }
-        .qty-btn { background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 10px; font-weight: bold; font-size: 18px; }
+        .score-pill { display: inline-block; padding: 4px 10px; border-radius: 20px; background: #f1f5f9; font-size: 12px; font-weight: 700; margin-right: 5px; }
     </style>
 </head>
 <body>
@@ -48,13 +46,13 @@
     <div style="display:flex; gap:10px; margin-bottom:15px;">
         <button class="profile-btn active" id="btn-Viv" onclick="switchUser('Viv')">VIV</button>
         <button class="profile-btn" id="btn-Avi" onclick="switchUser('Avi')">AVI</button>
-        <button onclick="toggleOverlay(true)" style="background:none; border:none; font-size:20px;">📊</button>
-        <button onclick="document.getElementById('goal-panel').style.display='flex'" style="background:none; border:none; font-size:20px;">⚙️</button>
+        <button onclick="toggleOverlay(true)" style="background:none; border:none; font-size:24px;">📊</button>
+        <button onclick="document.getElementById('goal-panel').style.display='flex'" style="background:none; border:none; font-size:24px;">⚙️</button>
     </div>
 
-    <div id="goal-panel">
+    <div id="goal-panel" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:3000; align-items:center; justify-content:center;">
         <div class="card" style="width:85%; max-width:400px;">
-            <h3 style="margin-top:0">Daily Targets</h3>
+            <h3>Daily Targets</h3>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
                 <div><small>Calories</small><input type="number" id="goal-cal" value="2000" style="width:90%; padding:8px;"></div>
                 <div><small>Protein (g)</small><input type="number" id="goal-p" value="150" style="width:90%; padding:8px;"></div>
@@ -87,39 +85,43 @@
             <input type="text" id="foodInput" placeholder="What did you eat?">
             <div style="display:flex; gap:10px; margin-top:12px;">
                 <input type="file" id="camInput" accept="image/*" capture="environment" style="display:none" onchange="processInput(true)">
-                <button type="button" class="btn-main btn-cam" style="flex:1; margin:0" onclick="document.getElementById('camInput').click()">📷 Photo</button>
+                <button type="button" class="btn-main" style="flex:1; margin:0; background:#64748b" onclick="document.getElementById('camInput').click()">📷 Photo</button>
                 <button type="submit" class="btn-main" style="flex:2; margin:0">Analyze & Log</button>
             </div>
         </form>
         <div id="quick-grid" class="quick-grid"></div>
-        <div id="loader" style="display:none; text-align:center; padding:15px; font-weight:bold; color:var(--primary);">Analyzing Nutrition...</div>
-        <button onclick="localStorage.removeItem('gemini_api_key'); location.reload();" style="width:100%; border:none; background:none; color:var(--gray); font-size:10px; margin-top:10px;">Update API Key</button>
+        <div id="loader" style="display:none; text-align:center; padding:15px; font-weight:bold; color:var(--primary);">AI is thinking...</div>
     </div>
+
+    <div id="daily-insight" class="insight-box" style="margin-bottom:15px; display:none;"></div>
 
     <div id="history-list"></div>
     <button onclick="clearData()" style="width:100%; border:none; background:none; color:#ef4444; font-size:12px; padding:20px 0;">Reset Today's Entries</button>
 
     <div id="overlay-view">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h2 style="margin:0">Performance</h2>
+            <h2 style="margin:0">Weekly Report</h2>
             <button onclick="toggleOverlay(false)" style="padding:8px 15px; border-radius:10px; border:none; background:#f1f5f9; font-weight:bold;">Close</button>
         </div>
+
+        <div style="margin-top:20px;">
+            <div class="score-pill" id="score-avg">Avg: 0 kcal</div>
+            <div class="score-pill" id="score-protein">Protein: 0%</div>
+        </div>
+
         <div id="weekly-chart" class="chart-container"></div>
+        
+        <div id="weekly-insights-list" style="margin-top:20px;"></div>
+
+        <button onclick="localStorage.removeItem('gemini_api_key'); location.reload();" style="width:100%; border:none; background:#fef2f2; color:#b91c1c; font-size:12px; padding:15px; border-radius:12px; margin-top:30px; font-weight:bold;">Update API Key</button>
     </div>
 
     <script>
-        // API SECURITY LOGIC: Fetches key from browser storage, not GitHub
         let GEMINI_KEY = localStorage.getItem('gemini_api_key');
-
         function checkApiKey() {
             if (!GEMINI_KEY || GEMINI_KEY === 'null') {
-                const userKey = prompt("Please enter your Gemini API Key (It will be saved locally in your browser):");
-                if (userKey) {
-                    localStorage.setItem('gemini_api_key', userKey);
-                    GEMINI_KEY = userKey;
-                } else {
-                    alert("App cannot function without an API key.");
-                }
+                const userKey = prompt("Enter Gemini API Key:");
+                if (userKey) { localStorage.setItem('gemini_api_key', userKey); GEMINI_KEY = userKey; }
             }
         }
 
@@ -138,66 +140,75 @@
         let currentUser = 'Viv';
         let userData = {};
 
-        const QUICK_MEALS = {
-            'Breakfast': [ {n:'Whey', i:'🥤', p:25, c:3, f:1, cal:120}, {n:'Coffee', i:'☕', p:0, c:2, f:2, cal:30}, {n:'Egg', i:'🥚', p:6, c:1, f:5, cal:70}, {n:'Apple', i:'🍎', p:0, c:25, f:0, cal:95} ],
-            'Lunch': [ {n:'Rice', i:'🍚', p:3, c:45, f:0, cal:200}, {n:'Chicken', i:'🍗', p:25, c:0, f:10, cal:200}, {n:'Salad', i:'🥗', p:1, c:5, f:0, cal:25}, {n:'Curd', i:'🥣', p:4, c:5, f:4, cal:100} ],
-            'Dinner': [ {n:'Paneer', i:'🧀', p:15, c:4, f:20, cal:250}, {n:'Chapati', i:'🫓', p:3, c:18, f:1, cal:90}, {n:'Dal', i:'🥣', p:7, c:20, f:5, cal:150}, {n:'Fish', i:'🐟', p:22, c:0, f:8, cal:170} ],
-            'Snack': [ {n:'Nuts', i:'🥜', p:6, c:6, f:14, cal:160}, {n:'Yogurt', i:'🍧', p:10, c:15, f:0, cal:100}, {n:'Banana', i:'🍌', p:1, c:27, f:0, cal:105}, {n:'Bar', i:'🍫', p:20, c:25, f:7, cal:220} ]
+        // Hardcoded Fallbacks
+        const FALLBACK_MEALS = {
+            'Breakfast': [ {n:'Egg', i:'🥚', p:6, c:1, f:5, cal:70}, {n:'Oats', i:'🥣', p:5, c:27, f:3, cal:150} ],
+            'Lunch': [ {n:'Rice', i:'🍚', p:3, c:45, f:0, cal:200}, {n:'Chicken', i:'🍗', p:25, c:0, f:10, cal:200} ],
+            'Dinner': [ {n:'Paneer', i:'🧀', p:15, c:4, f:20, cal:250}, {n:'Chapati', i:'🫓', p:3, c:18, f:1, cal:90} ],
+            'Snack': [ {n:'Nuts', i:'🥜', p:6, c:6, f:14, cal:160}, {n:'Whey', i:'🥤', p:25, c:3, f:1, cal:120} ]
         };
 
         db.ref('users').on('value', (snap) => { userData = snap.val() || {}; renderUI(); });
 
         function updateQuickAdd() {
             const cat = document.querySelector('input[name="meal"]:checked').value;
-            document.getElementById('quick-grid').innerHTML = QUICK_MEALS[cat].map(m => 
-                `<button class="quick-btn" onclick="saveMeal('${m.n}', ${m.p}, ${m.c}, ${m.f}, ${m.cal}, '${cat}')">${m.i} ${m.n}</button>`
+            const history = userData[currentUser]?.history || [];
+            
+            // Smart Logic: Count frequency of items in this category
+            const counts = {};
+            history.filter(m => m.type === cat).forEach(m => {
+                counts[m.name] = (counts[m.name] || 0) + 1;
+            });
+
+            // Get unique meal objects based on most frequent names
+            const sortedNames = Object.keys(counts).sort((a,b) => counts[b] - counts[a]);
+            let smartMeals = sortedNames.slice(0, 4).map(name => {
+                return history.find(m => m.name === name && m.type === cat);
+            });
+
+            // Fill empty slots with fallbacks if needed
+            if(smartMeals.length < 4) {
+                const existing = smartMeals.map(m => m.name);
+                FALLBACK_MEALS[cat].forEach(f => {
+                    if(!existing.includes(f.n) && smartMeals.length < 4) smartMeals.push({...f, name: f.n});
+                });
+            }
+
+            document.getElementById('quick-grid').innerHTML = smartMeals.map(m => 
+                `<button class="quick-btn" onclick="saveMeal('${m.name}', ${m.p}, ${m.c}, ${m.f}, ${m.cal}, '${cat}')">${m.i || '🍽️'} ${m.name}</button>`
             ).join('');
         }
 
         async function processInput(isPhoto) {
-            checkApiKey();
-            if (!GEMINI_KEY) return;
-
+            checkApiKey(); if (!GEMINI_KEY) return;
             const text = document.getElementById('foodInput').value;
             const file = document.getElementById('camInput').files[0];
             const type = document.querySelector('input[name="meal"]:checked').value;
             if(!text && !isPhoto) return;
 
             document.getElementById('loader').style.display = 'block';
-            
-            const models = ['gemini-3-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite']; 
+            const models = ['gemini-3-flash', 'gemini-2.5-flash'];
             let success = false;
-            let lastErr = "";
 
             for (const mName of models) {
                 if (success) break;
                 try {
                     const url = `https://generativelanguage.googleapis.com/v1/models/${mName}:generateContent?key=${GEMINI_KEY}`;
-                    let contents = [{ parts: [{ text: `Return JSON only: {"name":"Item","p":number,"c":number,"f":number,"cal":number}. Estimate for: ${text || 'food image'}` }] }];
-
+                    let contents = [{ parts: [{ text: `Return JSON only: {"name":"ItemName","p":number,"c":number,"f":number,"cal":number}. Estimate for: ${text || 'food image'}` }] }];
                     if (isPhoto && file) {
                         const b64 = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result.split(',')[1]); rd.readAsDataURL(file); });
                         contents[0].parts.push({ inline_data: { mime_type: file.type, data: b64 } });
                     }
-
                     const resp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents }) });
                     const data = await resp.json();
-                    
-                    if (data.candidates && data.candidates[0].content.parts[0].text) {
-                        const raw = data.candidates[0].content.parts[0].text;
-                        const match = raw.match(/\{.*\}/s);
-                        if (match) {
-                            const json = JSON.parse(match[0]);
-                            saveMeal(json.name, json.p, json.c, json.f, json.cal, type);
-                            success = true;
-                        }
-                    } else if (data.error) { 
-                        lastErr = data.error.message;
+                    if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
+                        const json = JSON.parse(data.candidates[0].content.parts[0].text.match(/\{.*\}/s)[0]);
+                        saveMeal(json.name, json.p, json.c, json.f, json.cal, type);
+                        success = true;
                     }
-                } catch (e) { lastErr = e.message; }
+                } catch (e) { console.error(e); }
             }
-
-            if(!success) alert("AI Error: " + lastErr);
+            if(!success) alert("AI failed to analyze.");
             document.getElementById('foodInput').value = '';
             document.getElementById('loader').style.display = 'none';
         }
@@ -208,13 +219,6 @@
             if(!userData[currentUser].history) userData[currentUser].history = [];
             userData[currentUser].history.unshift(item);
             db.ref('users/' + currentUser).set(userData[currentUser]);
-        }
-
-        function switchUser(name) {
-            currentUser = name;
-            document.querySelectorAll('.profile-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('btn-' + name).classList.add('active');
-            renderUI();
         }
 
         function renderUI() {
@@ -239,18 +243,69 @@
             document.getElementById('history-list').innerHTML = todayList.length === 0 ? `<p style="text-align:center; color:gray; padding:20px;">No meals logged today.</p>` :
                 todayList.map(m => `
                 <div class="history-item">
-                    <div>
-                        <b>${m.name}</b><br>
-                        <small>${m.type} • ${Math.round(m.cal * m.scale)} kcal</small><br>
-                        <div class="macro-badge">P: ${Math.round(m.p * m.scale)}g | C: ${Math.round(m.c * m.scale)}g | F: ${Math.round(m.f * m.scale)}g</div>
-                    </div>
+                    <div><b>${m.name}</b><br><small>${m.type} • ${Math.round(m.cal * m.scale)} kcal</small></div>
                     <div style="display:flex; align-items:center; gap:8px;">
                         <button class="qty-btn" onclick="updateScale(${m.id}, -0.5)">-</button>
                         <b>${m.scale}</b>
                         <button class="qty-btn" onclick="updateScale(${m.id}, 0.5)">+</button>
                     </div>
                 </div>`).join('');
+            
             updateQuickAdd();
+            renderDailyInsights(tots, g);
+        }
+
+        function renderDailyInsights(tots, g) {
+            const el = document.getElementById('daily-insight');
+            let msg = "";
+            if(tots.cal === 0) { el.style.display = "none"; return; }
+            el.style.display = "block";
+            
+            if(tots.p < g.p * 0.5) msg = "🍖 Low protein so far! Try adding eggs or a shake.";
+            else if(tots.cal > g.cal) msg = "⚠️ Calorie goal exceeded. Keep dinner light!";
+            else msg = "✅ Good progress! Stay consistent with your macros.";
+            el.innerText = msg;
+        }
+
+        function toggleOverlay(show) { document.getElementById('overlay-view').style.display = show ? 'block' : 'none'; if(show) renderReport(); }
+
+        function renderReport() {
+            const chart = document.getElementById('weekly-chart');
+            const u = userData[currentUser];
+            const dates = [];
+            for(let i=6; i>=0; i--) { const d = new Date(); d.setDate(d.getDate() - i); dates.push(d.toLocaleDateString()); }
+            
+            let totalCal = 0, pMetCount = 0;
+
+            chart.innerHTML = dates.map(d => {
+                let s = {p:0, cal:0};
+                if(u.history) u.history.forEach(h => { if(h.date === d) { s.cal += (h.cal * h.scale); s.p += (h.p * h.scale); } });
+                
+                const calMet = s.cal > 0 && s.cal <= u.goals.cal;
+                const pMet = s.p >= u.goals.p;
+                if(pMet) pMetCount++;
+                totalCal += s.cal;
+
+                const h = Math.min(100, (s.cal / u.goals.cal) * 100);
+                return `
+                <div class="chart-bar ${calMet ? 'goal-met' : ''}" style="height:${h * 1.2}px">
+                    <span class="bar-label">${Math.round(s.cal)}</span>
+                    <span style="position:absolute; bottom:-25px; left:50%; transform:translateX(-50%); font-size:9px; color:var(--gray);">${d.split('/')[0]}/${d.split('/')[1]}</span>
+                </div>`;
+            }).join('');
+
+            document.getElementById('score-avg').innerText = `Avg: ${Math.round(totalCal/7)} kcal`;
+            document.getElementById('score-protein').innerText = `Protein Consistency: ${Math.round((pMetCount/7)*100)}%`;
+            
+            const insightList = document.getElementById('weekly-insights-list');
+            insightList.innerHTML = `
+                <div class="insight-box" style="background:#f0fdf4; border-color:#22c55e">
+                    <b>Weekly Summary:</b><br>
+                    - You hit your protein goal ${pMetCount} out of 7 days.<br>
+                    - Your most active eating day was ${totalCal > 0 ? 'calculated' : 'N/A'}.<br>
+                    ${pMetCount < 4 ? "💡 Focus on increasing protein earlier in the day next week." : "🚀 Outstanding consistency on protein!"}
+                </div>
+            `;
         }
 
         function updateScale(id, delta) {
@@ -263,30 +318,6 @@
             userData[currentUser].goals = { cal: parseInt(document.getElementById('goal-cal').value), p: parseInt(document.getElementById('goal-p').value), c: parseInt(document.getElementById('goal-c').value), f: parseInt(document.getElementById('goal-f').value) };
             db.ref('users/' + currentUser).set(userData[currentUser]);
             document.getElementById('goal-panel').style.display = 'none';
-        }
-
-        function toggleOverlay(show) { document.getElementById('overlay-view').style.display = show ? 'block' : 'none'; if(show) renderReport(); }
-
-        function renderReport() {
-            const chart = document.getElementById('weekly-chart');
-            const u = userData[currentUser];
-            const dates = [];
-            for(let i=6; i>=0; i--) { const d = new Date(); d.setDate(d.getDate() - i); dates.push(d.toLocaleDateString()); }
-            chart.innerHTML = dates.map(d => {
-                let s = {p:0, c:0, f:0, cal:0};
-                if(u.history) u.history.forEach(h => { if(h.date === d) { ['p','c','f','cal'].forEach(k => s[k] += (h[k] * h.scale)); } });
-                const h = Math.min(100, (s.cal / u.goals.cal) * 100);
-                return `
-                <div class="chart-bar" style="height:${h * 1.2}px; background:${s.cal > u.goals.cal ? '#f43f5e' : 'var(--primary)'}">
-                    <span class="bar-label">${Math.round(s.cal)}</span>
-                    <div class="macro-labels">
-                        <span style="color:var(--p-color)">P:${Math.round(s.p)}</span><br>
-                        <span style="color:var(--c-color)">C:${Math.round(s.c)}</span><br>
-                        <span style="color:var(--f-color)">F:${Math.round(s.f)}</span>
-                    </div>
-                    <span style="position:absolute; bottom:-100px; left:50%; transform:translateX(-50%); font-size:8px; color:var(--gray); font-weight:bold;">${d.split('/')[0]}/${d.split('/')[1]}</span>
-                </div>`;
-            }).join('');
         }
 
         function clearData() { if(confirm("Reset logs?")) { userData[currentUser].history = (userData[currentUser].history || []).filter(m => m.date !== new Date().toLocaleDateString()); db.ref('users/' + currentUser + '/history').set(userData[currentUser].history); } }
