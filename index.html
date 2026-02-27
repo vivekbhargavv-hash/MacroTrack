@@ -93,6 +93,7 @@
         </form>
         <div id="quick-grid" class="quick-grid"></div>
         <div id="loader" style="display:none; text-align:center; padding:15px; font-weight:bold; color:var(--primary);">Analyzing Nutrition...</div>
+        <button onclick="localStorage.removeItem('gemini_api_key'); location.reload();" style="width:100%; border:none; background:none; color:var(--gray); font-size:10px; margin-top:10px;">Update API Key</button>
     </div>
 
     <div id="history-list"></div>
@@ -104,13 +105,24 @@
             <button onclick="toggleOverlay(false)" style="padding:8px 15px; border-radius:10px; border:none; background:#f1f5f9; font-weight:bold;">Close</button>
         </div>
         <div id="weekly-chart" class="chart-container"></div>
-        <div id="daily-insight" class="insight-card">Calculating...</div>
     </div>
 
     <script>
-        const GEMINI_KEY = 'AIzaSyDQJt74L3zXXKP1-i9YRbIS8B3fY6nGqs0';
+        // API SECURITY LOGIC: Fetches key from browser storage, not GitHub
+        let GEMINI_KEY = localStorage.getItem('gemini_api_key');
 
-        // Firebase Setup
+        function checkApiKey() {
+            if (!GEMINI_KEY || GEMINI_KEY === 'null') {
+                const userKey = prompt("Please enter your Gemini API Key (It will be saved locally in your browser):");
+                if (userKey) {
+                    localStorage.setItem('gemini_api_key', userKey);
+                    GEMINI_KEY = userKey;
+                } else {
+                    alert("App cannot function without an API key.");
+                }
+            }
+        }
+
         const firebaseConfig = {
             apiKey: "AIzaSyAFsD_ryAIQ_bZPgLBaCwgX_-_hs6Vc388",
             authDomain: "macrotrack-42d94.firebaseapp.com",
@@ -143,6 +155,9 @@
         }
 
         async function processInput(isPhoto) {
+            checkApiKey();
+            if (!GEMINI_KEY) return;
+
             const text = document.getElementById('foodInput').value;
             const file = document.getElementById('camInput').files[0];
             const type = document.querySelector('input[name="meal"]:checked').value;
@@ -150,7 +165,6 @@
 
             document.getElementById('loader').style.display = 'block';
             
-            // 2026 Stable Models & Endpoints
             const models = ['gemini-3-flash', 'gemini-2.5-flash', 'gemini-2.5-flash-lite']; 
             let success = false;
             let lastErr = "";
@@ -158,7 +172,6 @@
             for (const mName of models) {
                 if (success) break;
                 try {
-                    // Using STABLE v1 endpoint for 2026
                     const url = `https://generativelanguage.googleapis.com/v1/models/${mName}:generateContent?key=${GEMINI_KEY}`;
                     let contents = [{ parts: [{ text: `Return JSON only: {"name":"Item","p":number,"c":number,"f":number,"cal":number}. Estimate for: ${text || 'food image'}` }] }];
 
@@ -179,7 +192,7 @@
                             success = true;
                         }
                     } else if (data.error) { 
-                        lastErr = `(${mName}) ${data.error.message}`;
+                        lastErr = data.error.message;
                     }
                 } catch (e) { lastErr = e.message; }
             }
