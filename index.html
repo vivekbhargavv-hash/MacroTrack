@@ -38,7 +38,9 @@
         .chart-bar.goal-met { background: var(--success); }
         .bar-label { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: bold; }
         .history-item { padding: 12px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 8px; background: white; display: flex; justify-content: space-between; align-items: center; }
+        .macro-badge { font-size: 10px; color: var(--gray); font-family: monospace; margin-top: 2px; }
         .score-pill { display: inline-block; padding: 4px 10px; border-radius: 20px; background: #f1f5f9; font-size: 12px; font-weight: 700; margin-right: 5px; }
+        .qty-btn { background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 10px; font-weight: bold; font-size: 18px; }
     </style>
 </head>
 <body>
@@ -103,21 +105,18 @@
             <h2 style="margin:0">Weekly Report</h2>
             <button onclick="toggleOverlay(false)" style="padding:8px 15px; border-radius:10px; border:none; background:#f1f5f9; font-weight:bold;">Close</button>
         </div>
-
         <div style="margin-top:20px;">
             <div class="score-pill" id="score-avg">Avg: 0 kcal</div>
             <div class="score-pill" id="score-protein">Protein: 0%</div>
         </div>
-
         <div id="weekly-chart" class="chart-container"></div>
-        
         <div id="weekly-insights-list" style="margin-top:20px;"></div>
-
         <button onclick="localStorage.removeItem('gemini_api_key'); location.reload();" style="width:100%; border:none; background:#fef2f2; color:#b91c1c; font-size:12px; padding:15px; border-radius:12px; margin-top:30px; font-weight:bold;">Update API Key</button>
     </div>
 
     <script>
         let GEMINI_KEY = localStorage.getItem('gemini_api_key');
+        
         function checkApiKey() {
             if (!GEMINI_KEY || GEMINI_KEY === 'null') {
                 const userKey = prompt("Enter Gemini API Key:");
@@ -140,7 +139,6 @@
         let currentUser = 'Viv';
         let userData = {};
 
-        // Hardcoded Fallbacks
         const FALLBACK_MEALS = {
             'Breakfast': [ {n:'Egg', i:'🥚', p:6, c:1, f:5, cal:70}, {n:'Oats', i:'🥣', p:5, c:27, f:3, cal:150} ],
             'Lunch': [ {n:'Rice', i:'🍚', p:3, c:45, f:0, cal:200}, {n:'Chicken', i:'🍗', p:25, c:0, f:10, cal:200} ],
@@ -150,30 +148,25 @@
 
         db.ref('users').on('value', (snap) => { userData = snap.val() || {}; renderUI(); });
 
+        // SWITCH USER FUNCTION (Fixed)
+        function switchUser(name) {
+            currentUser = name;
+            document.querySelectorAll('.profile-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-' + name).classList.add('active');
+            renderUI();
+        }
+
         function updateQuickAdd() {
             const cat = document.querySelector('input[name="meal"]:checked').value;
             const history = userData[currentUser]?.history || [];
-            
-            // Smart Logic: Count frequency of items in this category
             const counts = {};
-            history.filter(m => m.type === cat).forEach(m => {
-                counts[m.name] = (counts[m.name] || 0) + 1;
-            });
-
-            // Get unique meal objects based on most frequent names
+            history.filter(m => m.type === cat).forEach(m => { counts[m.name] = (counts[m.name] || 0) + 1; });
             const sortedNames = Object.keys(counts).sort((a,b) => counts[b] - counts[a]);
-            let smartMeals = sortedNames.slice(0, 4).map(name => {
-                return history.find(m => m.name === name && m.type === cat);
-            });
-
-            // Fill empty slots with fallbacks if needed
+            let smartMeals = sortedNames.slice(0, 4).map(name => history.find(m => m.name === name && m.type === cat));
             if(smartMeals.length < 4) {
                 const existing = smartMeals.map(m => m.name);
-                FALLBACK_MEALS[cat].forEach(f => {
-                    if(!existing.includes(f.n) && smartMeals.length < 4) smartMeals.push({...f, name: f.n});
-                });
+                FALLBACK_MEALS[cat].forEach(f => { if(!existing.includes(f.n) && smartMeals.length < 4) smartMeals.push({...f, name: f.n}); });
             }
-
             document.getElementById('quick-grid').innerHTML = smartMeals.map(m => 
                 `<button class="quick-btn" onclick="saveMeal('${m.name}', ${m.p}, ${m.c}, ${m.f}, ${m.cal}, '${cat}')">${m.i || '🍽️'} ${m.name}</button>`
             ).join('');
@@ -185,16 +178,14 @@
             const file = document.getElementById('camInput').files[0];
             const type = document.querySelector('input[name="meal"]:checked').value;
             if(!text && !isPhoto) return;
-
             document.getElementById('loader').style.display = 'block';
             const models = ['gemini-3-flash', 'gemini-2.5-flash'];
             let success = false;
-
             for (const mName of models) {
                 if (success) break;
                 try {
                     const url = `https://generativelanguage.googleapis.com/v1/models/${mName}:generateContent?key=${GEMINI_KEY}`;
-                    let contents = [{ parts: [{ text: `Return JSON only: {"name":"ItemName","p":number,"c":number,"f":number,"cal":number}. Estimate for: ${text || 'food image'}` }] }];
+                    let contents = [{ parts: [{ text: `Return JSON only: {"name":"Item","p":number,"c":number,"f":number,"cal":number}. Estimate: ${text || 'image'}` }] }];
                     if (isPhoto && file) {
                         const b64 = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result.split(',')[1]); rd.readAsDataURL(file); });
                         contents[0].parts.push({ inline_data: { mime_type: file.type, data: b64 } });
@@ -208,7 +199,7 @@
                     }
                 } catch (e) { console.error(e); }
             }
-            if(!success) alert("AI failed to analyze.");
+            if(!success) alert("AI failed.");
             document.getElementById('foodInput').value = '';
             document.getElementById('loader').style.display = 'none';
         }
@@ -222,8 +213,7 @@
         }
 
         function renderUI() {
-            if (!userData[currentUser]) userData[currentUser] = { history: [], goals: {p:150, c:200, f:70, cal:2000} };
-            const u = userData[currentUser];
+            const u = userData[currentUser] || { history: [], goals: {p:150, c:200, f:70, cal:2000} };
             const today = new Date().toLocaleDateString();
             let tots = {p:0, c:0, f:0, cal:0};
             const history = u.history || [];
@@ -243,7 +233,11 @@
             document.getElementById('history-list').innerHTML = todayList.length === 0 ? `<p style="text-align:center; color:gray; padding:20px;">No meals logged today.</p>` :
                 todayList.map(m => `
                 <div class="history-item">
-                    <div><b>${m.name}</b><br><small>${m.type} • ${Math.round(m.cal * m.scale)} kcal</small></div>
+                    <div>
+                        <b>${m.name}</b><br>
+                        <small>${m.type} • ${Math.round(m.cal * m.scale)} kcal</small><br>
+                        <div class="macro-badge">P: ${Math.round(m.p * m.scale)}g | C: ${Math.round(m.c * m.scale)}g | F: ${Math.round(m.f * m.scale)}g</div>
+                    </div>
                     <div style="display:flex; align-items:center; gap:8px;">
                         <button class="qty-btn" onclick="updateScale(${m.id}, -0.5)">-</button>
                         <b>${m.scale}</b>
@@ -257,13 +251,10 @@
 
         function renderDailyInsights(tots, g) {
             const el = document.getElementById('daily-insight');
-            let msg = "";
             if(tots.cal === 0) { el.style.display = "none"; return; }
             el.style.display = "block";
-            
-            if(tots.p < g.p * 0.5) msg = "🍖 Low protein so far! Try adding eggs or a shake.";
-            else if(tots.cal > g.cal) msg = "⚠️ Calorie goal exceeded. Keep dinner light!";
-            else msg = "✅ Good progress! Stay consistent with your macros.";
+            let msg = tots.p < g.p * 0.5 ? "🍖 Low protein so far! Try adding eggs or a shake." : 
+                      tots.cal > g.cal ? "⚠️ Calorie goal exceeded. Keep dinner light!" : "✅ Good progress! Stay consistent.";
             el.innerText = msg;
         }
 
@@ -271,24 +262,18 @@
 
         function renderReport() {
             const chart = document.getElementById('weekly-chart');
-            const u = userData[currentUser];
+            const u = userData[currentUser] || { history: [], goals: {p:150, c:200, f:70, cal:2000} };
             const dates = [];
             for(let i=6; i>=0; i--) { const d = new Date(); d.setDate(d.getDate() - i); dates.push(d.toLocaleDateString()); }
-            
             let totalCal = 0, pMetCount = 0;
 
             chart.innerHTML = dates.map(d => {
                 let s = {p:0, cal:0};
                 if(u.history) u.history.forEach(h => { if(h.date === d) { s.cal += (h.cal * h.scale); s.p += (h.p * h.scale); } });
-                
-                const calMet = s.cal > 0 && s.cal <= u.goals.cal;
-                const pMet = s.p >= u.goals.p;
-                if(pMet) pMetCount++;
+                if(s.p >= u.goals.p) pMetCount++;
                 totalCal += s.cal;
-
                 const h = Math.min(100, (s.cal / u.goals.cal) * 100);
-                return `
-                <div class="chart-bar ${calMet ? 'goal-met' : ''}" style="height:${h * 1.2}px">
+                return `<div class="chart-bar ${s.cal > 0 && s.cal <= u.goals.cal ? 'goal-met' : ''}" style="height:${h * 1.2}px">
                     <span class="bar-label">${Math.round(s.cal)}</span>
                     <span style="position:absolute; bottom:-25px; left:50%; transform:translateX(-50%); font-size:9px; color:var(--gray);">${d.split('/')[0]}/${d.split('/')[1]}</span>
                 </div>`;
@@ -296,16 +281,8 @@
 
             document.getElementById('score-avg').innerText = `Avg: ${Math.round(totalCal/7)} kcal`;
             document.getElementById('score-protein').innerText = `Protein Consistency: ${Math.round((pMetCount/7)*100)}%`;
-            
-            const insightList = document.getElementById('weekly-insights-list');
-            insightList.innerHTML = `
-                <div class="insight-box" style="background:#f0fdf4; border-color:#22c55e">
-                    <b>Weekly Summary:</b><br>
-                    - You hit your protein goal ${pMetCount} out of 7 days.<br>
-                    - Your most active eating day was ${totalCal > 0 ? 'calculated' : 'N/A'}.<br>
-                    ${pMetCount < 4 ? "💡 Focus on increasing protein earlier in the day next week." : "🚀 Outstanding consistency on protein!"}
-                </div>
-            `;
+            document.getElementById('weekly-insights-list').innerHTML = `<div class="insight-box" style="background:#f0fdf4; border-color:#22c55e">
+                <b>Weekly Summary:</b><br>- Protein goals met: ${pMetCount}/7 days.<br>${pMetCount < 4 ? "💡 Aim for more protein early in the day." : "🚀 Great job on protein targets!"}</div>`;
         }
 
         function updateScale(id, delta) {
