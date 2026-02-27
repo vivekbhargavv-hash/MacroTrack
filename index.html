@@ -10,10 +10,8 @@
         :root { --primary: #4f46e5; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --gray: #64748b; --border: #e2e8f0; --p-color: #6366f1; --c-color: #10b981; --f-color: #f59e0b; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; padding-bottom: 90px; }
         .card { background: var(--card); padding: 16px; border-radius: 24px; border: 1px solid var(--border); margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        
         .profile-btn { flex: 1; padding: 12px; border-radius: 14px; border: 1px solid var(--border); background: white; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.3s; }
         .profile-btn.active { background: var(--primary); color: white; border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
-
         .dash-title { font-size: 11px; font-weight: 800; color: var(--gray); text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; }
         .main-progress { height: 16px; background: #e2e8f0; border-radius: 20px; overflow: hidden; margin-bottom: 15px; border: 1px solid #ddd; }
         .main-bar { height: 100%; background: linear-gradient(90deg, #4f46e5, #818cf8); transition: width 0.8s ease; width: 0%; }
@@ -23,27 +21,21 @@
         .macro-stat b { font-size: 12px; display: block; margin-bottom: 6px; }
         .mini-progress { height: 4px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
         .mini-bar { height: 100%; transition: width 0.8s ease; }
-
         .meal-selector { display: flex; gap: 6px; margin-bottom: 16px; background: #f1f5f9; padding: 4px; border-radius: 14px; }
         .meal-selector label { flex: 1; text-align: center; padding: 8px 2px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
         .meal-selector input { display: none; }
         .meal-selector input:checked + label { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         input[type="text"] { width: 100%; padding: 16px; border: 2px solid var(--border); border-radius: 16px; font-size: 16px; box-sizing: border-box; outline: none; }
-        
         .btn-main { width: 100%; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 700; font-size: 16px; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
         .btn-cam { background: #64748b; }
-
         .quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; }
         .quick-btn { background: white; border: 1px solid var(--border); padding: 8px 4px; border-radius: 12px; font-size: 10px; font-weight: 600; cursor: pointer; text-align: center; }
-
         #overlay-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .chart-container { display: flex; align-items: flex-end; justify-content: space-around; height: 120px; margin: 20px 0 40px 0; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+        .chart-container { display: flex; align-items: flex-end; justify-content: space-around; height: 120px; margin: 20px 0 60px 0; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
         .chart-bar { width: 25px; background: var(--primary); border-radius: 4px 4px 0 0; min-height: 2px; position: relative; }
         .bar-label { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: bold; color: var(--text); }
-        .macro-labels { position: absolute; bottom: -45px; left: 50%; transform: translateX(-50%); font-size: 8px; white-space: nowrap; line-height: 1.2; text-align: center; }
-
+        .macro-labels { position: absolute; bottom: -55px; left: 50%; transform: translateX(-50%); font-size: 8px; white-space: nowrap; line-height: 1.2; text-align: center; }
         #goal-panel { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:3000; align-items:center; justify-content:center; }
-        
         .history-item { padding: 12px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 8px; background: white; display: flex; justify-content: space-between; align-items: center; }
         .macro-badge { font-size: 10px; color: var(--gray); font-family: monospace; margin-top: 2px; }
         .qty-btn { background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 10px; font-weight: bold; font-size: 18px; }
@@ -83,18 +75,20 @@
     </div>
 
     <div class="card">
-        <div class="meal-selector">
-            <input type="radio" name="meal" id="r-br" value="Breakfast" onchange="updateQuickAdd()"><label for="r-br">Breakfast</label>
-            <input type="radio" name="meal" id="r-lu" value="Lunch" checked onchange="updateQuickAdd()"><label for="r-lu">Lunch</label>
-            <input type="radio" name="meal" id="r-di" value="Dinner" onchange="updateQuickAdd()"><label for="r-di">Dinner</label>
-            <input type="radio" name="meal" id="r-sn" value="Snack" onchange="updateQuickAdd()"><label for="r-sn">Snack</label>
-        </div>
-        <input type="text" id="foodInput" placeholder="Describe your meal...">
-        <div style="display:flex; gap:10px; margin-top:12px;">
-            <input type="file" id="camInput" accept="image/*" capture="environment" style="display:none" onchange="processInput(true)">
-            <button class="btn-main btn-cam" style="flex:1; margin:0" onclick="document.getElementById('camInput').click()">📷 Photo</button>
-            <button class="btn-main" style="flex:2; margin:0" onclick="processInput(false)">Analyze & Log</button>
-        </div>
+        <form onsubmit="event.preventDefault(); processInput(false);">
+            <div class="meal-selector">
+                <input type="radio" name="meal" id="r-br" value="Breakfast" onchange="updateQuickAdd()"><label for="r-br">Breakfast</label>
+                <input type="radio" name="meal" id="r-lu" value="Lunch" checked onchange="updateQuickAdd()"><label for="r-lu">Lunch</label>
+                <input type="radio" name="meal" id="r-di" value="Dinner" onchange="updateQuickAdd()"><label for="r-di">Dinner</label>
+                <input type="radio" name="meal" id="r-sn" value="Snack" onchange="updateQuickAdd()"><label for="r-sn">Snack</label>
+            </div>
+            <input type="text" id="foodInput" placeholder="Describe your meal (e.g. 2 eggs and toast)">
+            <div style="display:flex; gap:10px; margin-top:12px;">
+                <input type="file" id="camInput" accept="image/*" capture="environment" style="display:none" onchange="processInput(true)">
+                <button type="button" class="btn-main btn-cam" style="flex:1; margin:0" onclick="document.getElementById('camInput').click()">📷 Photo</button>
+                <button type="submit" class="btn-main" style="flex:2; margin:0">Analyze & Log</button>
+            </div>
+        </form>
         <div id="quick-grid" class="quick-grid"></div>
         <div id="loader" style="display:none; text-align:center; padding:15px; font-weight:bold; color:var(--primary);">AI Analyzing...</div>
     </div>
@@ -113,7 +107,7 @@
     </div>
 
     <script>
-        const GEMINI_KEY = 'YOUR_GEMINI_KEY_HERE';
+        const GEMINI_KEY = 'AIzaSyCo-DzOTyI0mvigIE4Ru86Ov4TKhVAoFFU';
 
         const firebaseConfig = {
             apiKey: "AIzaSyAFsD_ryAIQ_bZPgLBaCwgX_-_hs6Vc388",
@@ -137,24 +131,13 @@
             'Snack': [ {n:'Whey', i:'🥛', p:25, c:2, f:1, cal:120}, {n:'Yogurt', i:'🍧', p:8, c:12, f:0, cal:80}, {n:'Almond', i:'🥜', p:6, c:6, f:14, cal:160}, {n:'Protein bar', i:'🍫', p:20, c:25, f:7, cal:220} ]
         };
 
-        db.ref('users').on('value', (snap) => {
-            userData = snap.val() || {};
-            renderUI();
-        });
+        db.ref('users').on('value', (snap) => { userData = snap.val() || {}; renderUI(); });
 
         function updateQuickAdd() {
             const cat = document.querySelector('input[name="meal"]:checked').value;
-            const meals = QUICK_MEALS[cat];
-            document.getElementById('quick-grid').innerHTML = meals.map(m => 
+            document.getElementById('quick-grid').innerHTML = QUICK_MEALS[cat].map(m => 
                 `<button class="quick-btn" onclick="saveMeal('${m.n}', ${m.p}, ${m.c}, ${m.f}, ${m.cal}, '${cat}')">${m.i} ${m.n}</button>`
             ).join('');
-        }
-
-        function switchUser(name) {
-            currentUser = name;
-            document.querySelectorAll('.profile-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('btn-' + name).classList.add('active');
-            renderUI();
         }
 
         async function processInput(isPhoto) {
@@ -162,28 +145,36 @@
             const file = document.getElementById('camInput').files[0];
             const type = document.querySelector('input[name="meal"]:checked').value;
             if(!text && !isPhoto) return;
+
             document.getElementById('loader').style.display = 'block';
-            const models = ['gemini-3-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-flash'];
+            // 2026 stable model endpoints
+            const models = ['gemini-3.1-flash', 'gemini-3-flash-preview', 'gemini-2.5-flash'];
             let success = false;
+
             for (const mName of models) {
                 if (success) break;
                 try {
                     const url = `https://generativelanguage.googleapis.com/v1beta/models/${mName}:generateContent?key=${GEMINI_KEY}`;
-                    let parts = [{ text: `JSON ONLY: {"name":"Item","p":number,"c":number,"f":number,"cal":number} for ${text || 'image'}` }];
+                    let parts = [{ text: `Respond ONLY with a JSON object: {"name":"ItemName","p":number,"c":number,"f":number,"cal":number}. Estimate macros for: ${text || 'the food in this image'}` }];
+                    
                     if (isPhoto && file) {
                         const b64 = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result.split(',')[1]); rd.readAsDataURL(file); });
-                        parts.push({ inline_data: { mime_type: "image/jpeg", data: b64 } });
+                        parts.push({ inline_data: { mime_type: file.type, data: b64 } });
                     }
-                    const resp = await fetch(url, { method: 'POST', body: JSON.stringify({ contents: [{ parts }] }) });
-                    if (!resp.ok) continue;
+
+                    const resp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts }] }) });
                     const data = await resp.json();
-                    const raw = data.candidates[0].content.parts[0].text;
-                    const json = JSON.parse(raw.substring(raw.indexOf('{'), raw.lastIndexOf('}') + 1));
-                    saveMeal(json.name, json.p, json.c, json.f, json.cal, type);
-                    success = true;
-                } catch (e) { console.warn(mName + " failed"); }
+                    
+                    if (data.candidates && data.candidates[0].content.parts[0].text) {
+                        const raw = data.candidates[0].content.parts[0].text;
+                        const cleanJson = JSON.parse(raw.substring(raw.indexOf('{'), raw.lastIndexOf('}') + 1));
+                        saveMeal(cleanJson.name, cleanJson.p, cleanJson.c, cleanJson.f, cleanJson.cal, type);
+                        success = true;
+                    }
+                } catch (e) { console.warn(`Model ${mName} failed, trying next...`, e); }
             }
-            if(!success) alert("AI Error.");
+
+            if(!success) alert("AI failed to process. Check your API key or internet.");
             document.getElementById('foodInput').value = '';
             document.getElementById('loader').style.display = 'none';
         }
@@ -194,6 +185,13 @@
             if(!userData[currentUser].history) userData[currentUser].history = [];
             userData[currentUser].history.unshift(item);
             db.ref('users/' + currentUser).set(userData[currentUser]);
+        }
+
+        function switchUser(name) {
+            currentUser = name;
+            document.querySelectorAll('.profile-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn-' + name).classList.add('active');
+            renderUI();
         }
 
         function renderUI() {
@@ -264,7 +262,7 @@
                         <span style="color:var(--c-color)">C:${Math.round(s.c)}</span><br>
                         <span style="color:var(--f-color)">F:${Math.round(s.f)}</span>
                     </div>
-                    <span style="position:absolute; bottom:-60px; left:50%; transform:translateX(-50%); font-size:8px; color:var(--gray); font-weight:bold;">${d.split('/')[0]}/${d.split('/')[1]}</span>
+                    <span style="position:absolute; bottom:-75px; left:50%; transform:translateX(-50%); font-size:8px; color:var(--gray); font-weight:bold;">${d.split('/')[0]}/${d.split('/')[1]}</span>
                 </div>`;
             }).join('');
         }
