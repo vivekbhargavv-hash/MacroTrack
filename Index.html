@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MacroTrack Cloud</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <style>
+        :root { --primary: #4f46e5; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --gray: #64748b; --border: #e2e8f0; --p-color: #6366f1; --c-color: #10b981; --f-color: #f59e0b; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; padding-bottom: 60px; }
+        .card { background: var(--card); padding: 14px; border-radius: 20px; border: 1px solid var(--border); margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .profile-btn { padding: 6px 12px; border-radius: 10px; border: 1px solid var(--border); background: white; font-size: 12px; font-weight: 700; cursor: pointer; }
+        .profile-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .dash-title { font-size: 10px; font-weight: 700; color: var(--gray); text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; }
+        .main-progress { height: 12px; background: #e2e8f0; border-radius: 20px; overflow: hidden; margin-bottom: 12px; }
+        .main-bar { height: 100%; background: var(--primary); transition: width 0.5s; width: 0%; }
+        .macro-row { display: flex; gap: 8px; }
+        .macro-stat { flex: 1; padding: 10px; border-radius: 12px; background: #f1f5f9; border-bottom: 4px solid #ddd; text-align: center; }
+        .macro-stat.p { border-color: var(--p-color); } .macro-stat.c { border-color: var(--c-color); } .macro-stat.f { border-color: var(--f-color); }
+        .macro-stat small { font-size: 9px; display: block; color: var(--gray); font-weight: bold; }
+        .macro-stat b { font-size: 11px; }
+        #report-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
+        .chart-container { display: flex; align-items: flex-end; justify-content: space-around; height: 150px; padding-top: 20px; margin-bottom: 20px; border-bottom: 2px solid var(--border); }
+        .chart-bar { width: 25px; background: var(--primary); border-radius: 5px 5px 0 0; position: relative; }
+        .chart-label { font-size: 9px; color: var(--gray); margin-top: 8px; text-align: center; }
+        .meal-selector { display: flex; gap: 4px; margin-bottom: 12px; }
+        .meal-selector label { flex: 1; text-align: center; padding: 10px 2px; border: 1px solid var(--border); border-radius: 10px; font-size: 10px; font-weight: 600; cursor: pointer; background: white; }
+        .meal-selector input { display: none; }
+        .meal-selector input:checked + label { background: var(--primary); color: white; border-color: var(--primary); }
+        input[type="text"] { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 12px; font-size: 15px; box-sizing: border-box; outline: none; }
+        .btn-main { width: 100%; background: var(--primary); color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 700; margin-top: 10px; }
+        .btn-ghost { background: transparent; color: var(--primary); border: 1px solid var(--primary); padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; }
+        .history-item { padding: 12px; border-radius: 15px; border: 1px solid #f1f5f9; margin-bottom: 8px; background: white; }
+        .qty-btn { background: #f8fafc; border: 1px solid var(--border); padding: 4px 12px; border-radius: 8px; font-weight: bold; }
+        .sync-status { font-size: 9px; color: #10b981; text-align: center; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div id="profile-selector" style="display:flex; gap:5px;">
+            <button class="profile-btn active" id="btn-Vivek" onclick="switchUser('Vivek')">Vivek</button>
+            <button class="profile-btn" id="btn-Avani" onclick="switchUser('Avani')">Avani</button>
+        </div>
+        <div style="display:flex; gap:5px;">
+            <button class="btn-ghost" onclick="toggleReport(true)">📊 Report</button>
+            <button onclick="document.getElementById('goal-panel').style.display='block'" style="font-size:10px; padding:6px 10px; border:1px solid #ddd; background:#fff; border-radius:8px;">Goals</button>
+        </div>
+    </div>
+
+    <div id="goal-panel" class="card" style="display:none; position:fixed; top:15%; left:5%; width:90%; z-index:100; border: 2px solid var(--primary); box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+        <h3 id="goal-header" style="margin-top:0; font-size:14px;">Targets</h3>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <div><small>Kcal</small><input type="number" id="goal-cal" value="2000" style="width:100%; padding:8px;"></div>
+            <div><small>Protein(g)</small><input type="number" id="goal-p" value="150" style="width:100%; padding:8px;"></div>
+            <div><small>Carbs(g)</small><input type="number" id="goal-c" value="200" style="width:100%; padding:8px;"></div>
+            <div><small>Fats(g)</small><input type="number" id="goal-f" value="70" style="width:100%; padding:8px;"></div>
+        </div>
+        <button class="btn-main" onclick="updateGoals()">Save Targets</button>
+    </div>
+
+    <div id="report-view">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 id="report-user-title">Weekly Summary</h3>
+            <button class="btn-ghost" onclick="toggleReport(false)">Close</button>
+        </div>
+        <div id="weekly-chart" class="chart-container"></div>
+        <div id="weekly-stats"></div>
+    </div>
+
+    <div class="card">
+        <div class="dash-title"><span><span id="user-display">Vivek</span>'s Calories</span> <span id="cal-text">0 / 2000</span></div>
+        <div class="main-progress"><div id="cal-bar" class="main-bar"></div></div>
+        <div class="macro-row">
+            <div class="macro-stat p"><small>PROTEIN</small><b id="tot-p">0g</b></div>
+            <div class="macro-stat c"><small>CARBS</small><b id="tot-c">0g</b></div>
+            <div class="macro-stat f"><small>FATS</small><b id="tot-f">0g</b></div>
+        </div>
+        <div class="sync-status" id="sync-status">Cloud Sync Active ☁️</div>
+    </div>
+
+    <div class="card">
+        <div class="meal-selector">
+            <input type="radio" name="meal" id="r-br" value="Breakfast" checked><label for="r-br">Breakfast</label>
+            <input type="radio" name="meal" id="r-lu" value="Lunch"><label for="r-lu">Lunch</label>
+            <input type="radio" name="meal" id="r-di" value="Dinner"><label for="r-di">Dinner</label>
+            <input type="radio" name="meal" id="r-sn" value="Snack"><label for="r-sn">Snack</label>
+        </div>
+        <input type="text" id="foodInput" placeholder="Log for active user...">
+        <div style="display:flex; gap:8px;">
+            <button class="btn-main" id="addBtn" onclick="processInput()">Analyze & Log</button>
+        </div>
+        <div id="loader" style="display:none; text-align:center; padding:10px; font-weight:bold; color:var(--primary); font-size: 11px;">AI Cloud Syncing...</div>
+    </div>
+
+    <div id="history-list"></div>
+    <button onclick="clearData()" style="width:100%; border:none; background:none; color:#ef4444; font-size:11px; padding:20px 0;">Reset Today</button>
+
+    <script>
+        // 1. ADD YOUR GEMINI KEY HERE
+        const GEMINI_API_KEY = 'AIzaSyBBJTCJ3Xq7UOvNOvKtahIHK2y7CU21zQA';
+
+        // 2. YOUR FIREBASE CONFIG (Sourced from your image)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAFsD_ryAIQ_bZPgLBaCwgX_-_hs6Vc388",
+            authDomain: "macrotrack-42d94.firebaseapp.com",
+            databaseURL: "https://macrotrack-42d94-default-rtdb.firebaseio.com",
+            projectId: "macrotrack-42d94",
+            storageBucket: "macrotrack-42d94.firebasestorage.app",
+            messagingSenderId: "1081766952227",
+            appId: "1:1081766952227:web:828910be523dac0ea42096"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.
