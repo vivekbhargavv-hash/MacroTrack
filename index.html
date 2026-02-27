@@ -3,86 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MacroTrack Cloud</title>
+    <title>MacroTrack: Viv & Avi</title>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     <style>
         :root { --primary: #4f46e5; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --gray: #64748b; --border: #e2e8f0; --p-color: #6366f1; --c-color: #10b981; --f-color: #f59e0b; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; padding-bottom: 80px; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; padding-bottom: 90px; }
         .card { background: var(--card); padding: 16px; border-radius: 24px; border: 1px solid var(--border); margin-bottom: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .profile-btn { flex: 1; padding: 10px; border-radius: 12px; border: 1px solid var(--border); background: white; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; }
-        .profile-btn.active { background: var(--primary); color: white; border-color: var(--primary); transform: scale(1.05); }
-        .dash-title { font-size: 11px; font-weight: 800; color: var(--gray); text-transform: uppercase; margin-bottom: 10px; display: flex; justify-content: space-between; }
-        .main-progress { height: 14px; background: #e2e8f0; border-radius: 20px; overflow: hidden; margin-bottom: 15px; }
-        .main-bar { height: 100%; background: var(--primary); transition: width 0.8s ease; width: 0%; }
-        .macro-row { display: flex; gap: 10px; }
-        .macro-stat { flex: 1; padding: 12px; border-radius: 16px; background: #f8fafc; border-bottom: 4px solid #ddd; text-align: center; }
-        .macro-stat.p { border-color: var(--p-color); } .macro-stat.c { border-color: var(--c-color); } .macro-stat.f { border-color: var(--f-color); }
-        .macro-stat small { font-size: 10px; display: block; color: var(--gray); font-weight: bold; margin-bottom: 4px; }
-        .meal-selector { display: flex; gap: 6px; margin-bottom: 16px; background: #f1f5f9; padding: 4px; border-radius: 14px; }
-        .meal-selector label { flex: 1; text-align: center; padding: 8px 2px; border-radius: 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
-        .meal-selector input { display: none; }
-        .meal-selector input:checked + label { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        input[type="text"] { width: 100%; padding: 16px; border: 2px solid var(--border); border-radius: 16px; font-size: 16px; box-sizing: border-box; outline: none; }
-        .btn-main { width: 100%; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 700; font-size: 16px; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-cam { background: #64748b; }
-        .history-item { padding: 15px; border-radius: 18px; border: 1px solid var(--border); margin-bottom: 10px; background: white; display: flex; justify-content: space-between; align-items: center; }
-        .qty-btn { background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 10px; font-weight: bold; font-size: 18px; }
-        .sync-tag { font-size: 10px; color: #10b981; font-weight: bold; text-align: center; margin-top: 8px; display: block;}
+        
+        /* Header & Profile */
+        .profile-btn { flex: 1; padding: 12px; border-radius: 14px; border: 1px solid var(--border); background: white; font-size: 14px; font-weight: 800; cursor: pointer; transition: 0.3s; }
+        .profile-btn.active { background: var(--primary); color: white; border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+
+        /* Dashboard */
+        .dash-title { font-size: 11px; font-weight: 800; color: var(--gray); text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; }
+        .main-progress { height: 16px; background: #e2e8f0; border-radius: 20px; overflow: hidden; margin-bottom: 15px; border: 1px solid #ddd; }
+        .main-bar { height: 100%; background: linear-gradient(90deg, #4f46e5, #818cf8); transition: width 0.8s ease; width: 0%; }
+        
+        /* Macro Grids */
+        .macro-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .macro-stat { padding: 10px; border-radius: 16px; background: #f8fafc; text-align: center; border: 1px solid var(--border); }
+        .macro-stat small { font-size: 9px; font-weight: 800; color: var(--gray); display: block; margin-bottom: 4px; }
+        .macro-stat b { font-size: 12px; display: block; margin-bottom: 6px; }
+        .mini-progress { height: 4px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
+        .mini-bar { height: 100%; transition: width 0.8s ease; }
+
+        /* Quick Add */
+        .quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; }
+        .quick-btn { background: white; border: 1px solid var(--border); padding: 8px; border-radius: 12px; font-size: 11px; font-weight: 600; cursor: pointer; }
+
+        /* Report & Insights Overlay */
+        #overlay-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .chart-container { display: flex; align-items: flex-end; justify-content: space-around; height: 150px; margin: 20px 0; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+        .chart-bar { width: 20px; background: var(--primary); border-radius: 4px 4px 0 0; min-height: 2px; }
+        .insight-card { background: #eff6ff; padding: 15px; border-radius: 16px; border-left: 4px solid var(--primary); margin-top: 15px; font-size: 13px; line-height: 1.5; }
+
+        /* Input Styles */
+        .meal-selector { display: flex; gap: 4px; margin-bottom: 12px; background: #f1f5f9; padding: 4px; border-radius: 12px; }
+        .meal-selector label { flex: 1; text-align: center; padding: 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+        .meal-selector input:checked + label { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .btn-main { width: 100%; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 700; margin-top: 10px; }
+        .history-item { padding: 12px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 8px; background: white; display: flex; justify-content: space-between; align-items: center; }
         #goal-panel { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:3000; align-items:center; justify-content:center; }
     </style>
 </head>
 <body>
 
     <div style="display:flex; gap:10px; margin-bottom:15px;">
-        <button class="profile-btn active" id="btn-Vivek" onclick="switchUser('Vivek')">Vivek</button>
-        <button class="profile-btn" id="btn-Avani" onclick="switchUser('Avani')">Avani</button>
+        <button class="profile-btn active" id="btn-Viv" onclick="switchUser('Viv')">VIV</button>
+        <button class="profile-btn" id="btn-Avi" onclick="switchUser('Avi')">AVI</button>
+        <button onclick="toggleOverlay(true)" style="background:none; border:none; font-size:20px;">📊</button>
         <button onclick="document.getElementById('goal-panel').style.display='flex'" style="background:none; border:none; font-size:20px;">⚙️</button>
     </div>
 
     <div id="goal-panel">
         <div class="card" style="width:85%; max-width:400px;">
-            <h3>Targets</h3>
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                <div><small>Kcal</small><input type="number" id="goal-cal" style="width:80%"></div>
-                <div><small>Protein</small><input type="number" id="goal-p" style="width:80%"></div>
-                <div><small>Carbs</small><input type="number" id="goal-c" style="width:80%"></div>
-                <div><small>Fats</small><input type="number" id="goal-f" style="width:80%"></div>
+            <h3 style="margin-top:0">Daily Targets</h3>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                <div><small>Calories</small><input type="number" id="goal-cal" style="width:90%; padding:8px;"></div>
+                <div><small>Protein (g)</small><input type="number" id="goal-p" style="width:90%; padding:8px;"></div>
+                <div><small>Carbs (g)</small><input type="number" id="goal-c" style="width:90%; padding:8px;"></div>
+                <div><small>Fats (g)</small><input type="number" id="goal-f" style="width:90%; padding:8px;"></div>
             </div>
-            <button class="btn-main" onclick="updateGoals()">Save</button>
-            <button onclick="document.getElementById('goal-panel').style.display='none'" style="width:100%; border:none; background:none; margin-top:10px;">Close</button>
+            <button class="btn-main" onclick="updateGoals()">Save Targets</button>
+            <button onclick="document.getElementById('goal-panel').style.display='none'" style="width:100%; border:none; background:none; margin-top:10px; color:var(--gray)">Close</button>
         </div>
     </div>
 
     <div class="card">
-        <div class="dash-title"><span id="user-display">VIVEK</span><span id="cal-text">0 / 2000</span></div>
+        <div class="dash-title"><span id="user-display">VIV</span><span id="cal-text">0 / 2000</span></div>
         <div class="main-progress"><div id="cal-bar" class="main-bar"></div></div>
         <div class="macro-row">
-            <div class="macro-stat p"><small>PROTEIN</small><b id="tot-p">0g</b></div>
-            <div class="macro-stat c"><small>CARBS</small><b id="tot-c">0g</b></div>
-            <div class="macro-stat f"><small>FATS</small><b id="tot-f">0g</b></div>
+            <div class="macro-stat">
+                <small>PROTEIN</small>
+                <b id="txt-p">0/150g</b>
+                <div class="mini-progress"><div id="bar-p" class="mini-bar" style="background:var(--p-color)"></div></div>
+            </div>
+            <div class="macro-stat">
+                <small>CARBS</small>
+                <b id="txt-c">0/200g</b>
+                <div class="mini-progress"><div id="bar-c" class="mini-bar" style="background:var(--c-color)"></div></div>
+            </div>
+            <div class="macro-stat">
+                <small>FATS</small>
+                <b id="txt-f">0/70g</b>
+                <div class="mini-progress"><div id="bar-f" class="mini-bar" style="background:var(--f-color)"></div></div>
+            </div>
         </div>
-        <span class="sync-tag" id="sync-status">Cloud Sync Active ☁️</span>
     </div>
 
     <div class="card">
         <div class="meal-selector">
-            <input type="radio" name="meal" id="r-br" value="Breakfast"><label for="r-br">Breakfast</label>
-            <input type="radio" name="meal" id="r-lu" value="Lunch" checked><label for="r-lu">Lunch</label>
-            <input type="radio" name="meal" id="r-di" value="Dinner"><label for="r-di">Dinner</label>
-            <input type="radio" name="meal" id="r-sn" value="Snack"><label for="r-sn">Snack</label>
+            <input type="radio" name="meal" id="r-br" value="Breakfast"><label for="r-br">BRKFST</label>
+            <input type="radio" name="meal" id="r-lu" value="Lunch" checked><label for="r-lu">LUNCH</label>
+            <input type="radio" name="meal" id="r-di" value="Dinner"><label for="r-di">DINNER</label>
+            <input type="radio" name="meal" id="r-sn" value="Snack"><label for="r-sn">SNACK</label>
         </div>
-        <input type="text" id="foodInput" placeholder="Describe your meal...">
-        <div style="display:flex; gap:10px; margin-top:12px;">
+        <input type="text" id="foodInput" placeholder="What did you eat?">
+        <div style="display:flex; gap:8px; margin-top:10px;">
             <input type="file" id="camInput" accept="image/*" capture="environment" style="display:none" onchange="processInput(true)">
-            <button class="btn-main btn-cam" style="flex:1" onclick="document.getElementById('camInput').click()">📷 Photo</button>
-            <button class="btn-main" style="flex:2" onclick="processInput(false)">Analyze & Log</button>
+            <button class="btn-main" style="background:#64748b; flex:1; margin:0" onclick="document.getElementById('camInput').click()">📷 Photo</button>
+            <button class="btn-main" style="flex:2; margin:0" onclick="processInput(false)">Analyze & Log</button>
         </div>
-        <div id="loader" style="display:none; text-align:center; padding:15px; font-weight:bold; color:var(--primary);">AI Analyzing...</div>
+        
+        <div class="quick-grid">
+            <button class="quick-btn" onclick="quickAdd('Whey Protein', 25, 2, 1, 120)">🥤 Whey</button>
+            <button class="quick-btn" onclick="quickAdd('Black Coffee', 0, 0, 0, 2)">☕ Coffee</button>
+            <button class="quick-btn" onclick="quickAdd('Boiled Egg', 6, 1, 5, 70)">🥚 Egg</button>
+            <button class="quick-btn" onclick="quickAdd('Apple', 0, 25, 0, 95)">🍎 Apple</button>
+        </div>
+        <div id="loader" style="display:none; text-align:center; padding:10px; font-weight:bold; color:var(--primary);">AI is thinking...</div>
     </div>
 
     <div id="history-list"></div>
-    <button onclick="clearData()" style="width:100%; border:none; background:none; color:#ef4444; font-size:12px; padding:20px 0;">Reset Today's Entries</button>
+
+    <div id="overlay-view">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2 id="report-title" style="margin:0">Reports</h2>
+            <button onclick="toggleOverlay(false)" style="padding:8px 15px; border-radius:10px; border:none; background:#f1f5f9; font-weight:bold;">Close</button>
+        </div>
+        
+        <h4 style="margin-bottom:5px; margin-top:25px;">Last 7 Days (Calories)</h4>
+        <div id="weekly-chart" class="chart-container"></div>
+        
+        <h4 style="margin-bottom:5px;">Daily Insight</h4>
+        <div id="daily-insight" class="insight-card">Log more meals to see AI insights!</div>
+    </div>
 
     <script>
         const GEMINI_KEY = 'AIzaSyCo-DzOTyI0mvigIE4Ru86Ov4TKhVAoFFU';
@@ -99,7 +145,7 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        let currentUser = 'Vivek';
+        let currentUser = 'Viv';
         let userData = {};
 
         db.ref('users').on('value', (snap) => {
@@ -124,80 +170,77 @@
             const models = ['gemini-3-flash', 'gemini-2.5-flash-lite', 'gemini-2.5-flash'];
             let success = false;
 
-            for (const modelName of models) {
+            for (const mName of models) {
                 if (success) break;
                 try {
-                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${GEMINI_KEY}`;
-                    let parts = [{ text: `Return ONLY JSON: {"name":"Item","p":number,"c":number,"f":number,"cal":number} for ${text || 'this image'}` }];
-                    
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${mName}:generateContent?key=${GEMINI_KEY}`;
+                    let parts = [{ text: `JSON ONLY: {"name":"Item","p":number,"c":number,"f":number,"cal":number} for ${text || 'image'}` }];
                     if (isPhoto && file) {
                         const b64 = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result.split(',')[1]); rd.readAsDataURL(file); });
                         parts.push({ inline_data: { mime_type: "image/jpeg", data: b64 } });
                     }
-
-                    const resp = await fetch(url, { 
-                        method: 'POST', 
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ contents: [{ parts }] }) 
-                    });
-
+                    const resp = await fetch(url, { method: 'POST', body: JSON.stringify({ contents: [{ parts }] }) });
                     if (!resp.ok) continue;
-
                     const data = await resp.json();
                     const raw = data.candidates[0].content.parts[0].text;
                     const json = JSON.parse(raw.substring(raw.indexOf('{'), raw.lastIndexOf('}') + 1));
-                    
-                    json.id = Date.now(); json.type = type; json.scale = 1; json.date = new Date().toLocaleDateString();
-                    
-                    if(!userData[currentUser]) userData[currentUser] = { history: [], goals: {p:150, c:200, f:70, cal:2000} };
-                    if(!userData[currentUser].history) userData[currentUser].history = [];
-                    
-                    userData[currentUser].history.unshift(json);
-                    db.ref('users/' + currentUser).set(userData[currentUser]);
+                    saveMeal(json.name, json.p, json.c, json.f, json.cal, type);
                     success = true;
-                } catch (e) { console.warn(`Model ${modelName} failed, trying next...`); }
+                } catch (e) { console.warn(mName + " failed"); }
             }
-
-            if(!success) alert("AI Sync Error. Check Gemini Key.");
+            if(!success) alert("AI Error.");
             document.getElementById('foodInput').value = '';
             document.getElementById('loader').style.display = 'none';
         }
 
-        function renderUI() {
-            if (!currentUser) return;
-            if (!userData[currentUser]) {
-                userData[currentUser] = { history: [], goals: {p:100, c:150, f:50, cal:1500} };
-            }
+        function quickAdd(name, p, c, f, cal) {
+            const type = document.querySelector('input[name="meal"]:checked').value;
+            saveMeal(name, p, c, f, cal, type);
+        }
 
+        function saveMeal(name, p, c, f, cal, type) {
+            if(!userData[currentUser]) userData[currentUser] = { history: [], goals: {p:150, c:200, f:70, cal:2000} };
+            const item = { id: Date.now(), name, p, c, f, cal, type, scale: 1, date: new Date().toLocaleDateString() };
+            if(!userData[currentUser].history) userData[currentUser].history = [];
+            userData[currentUser].history.unshift(item);
+            db.ref('users/' + currentUser).set(userData[currentUser]);
+        }
+
+        function renderUI() {
+            if (!userData[currentUser]) userData[currentUser] = { history: [], goals: {p:150, c:200, f:70, cal:2000} };
             const u = userData[currentUser];
             const today = new Date().toLocaleDateString();
             let tots = {p:0, c:0, f:0, cal:0};
             
             const history = u.history || [];
             history.forEach(m => { 
-                if(m.date === today) {
-                    ['p','c','f','cal'].forEach(k => { tots[k] += (Number(m[k]) * (Number(m.scale) || 1)); });
-                }
+                if(m.date === today) { ['p','c','f','cal'].forEach(k => { tots[k] += (Number(m[k]) * (Number(m.scale) || 1)); }); }
             });
 
             document.getElementById('user-display').innerText = currentUser.toUpperCase();
-            const target = u.goals ? u.goals.cal : 2000;
-            document.getElementById('cal-bar').style.width = Math.min(100, (tots.cal / target) * 100) + '%';
-            document.getElementById('cal-text').innerText = `${Math.round(tots.cal)} / ${target}`;
-            ['p','c','f'].forEach(k => document.getElementById(`tot-${k}`).innerText = Math.round(tots[k]) + 'g');
+            const g = u.goals;
+            document.getElementById('cal-bar').style.width = Math.min(100, (tots.cal / g.cal) * 100) + '%';
+            document.getElementById('cal-text').innerText = `${Math.round(tots.cal)} / ${g.cal}`;
 
-            const list = history.filter(m => m.date === today);
-            document.getElementById('history-list').innerHTML = list.length === 0 ? 
-                `<p style="text-align:center; color:gray; padding:20px;">No meals for ${currentUser} today.</p>` :
-                list.map(m => `
+            ['p','c','f'].forEach(k => {
+                const consumed = Math.round(tots[k]);
+                const target = g[k];
+                document.getElementById(`txt-${k}`).innerText = `${consumed}/${target}g`;
+                document.getElementById(`bar-${k}`).style.width = Math.min(100, (consumed / target) * 100) + '%';
+            });
+
+            const todayList = history.filter(m => m.date === today);
+            document.getElementById('history-list').innerHTML = todayList.map(m => `
                 <div class="history-item">
                     <div><b>${m.name}</b><br><small>${m.type} • ${Math.round(m.cal * (m.scale || 1))} kcal</small></div>
-                    <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
                         <button class="qty-btn" onclick="updateScale(${m.id}, -0.5)">-</button>
-                        <b>${m.scale || 1}</b>
+                        <b>${m.scale}</b>
                         <button class="qty-btn" onclick="updateScale(${m.id}, 0.5)">+</button>
                     </div>
                 </div>`).join('');
+            
+            updateInsights(tots, g);
         }
 
         function updateScale(id, delta) {
@@ -208,19 +251,47 @@
 
         function updateGoals() {
             userData[currentUser].goals = { 
-                cal: parseInt(document.getElementById('goal-cal').value) || 2000, 
-                p: parseInt(document.getElementById('goal-p').value) || 100, 
-                c: parseInt(document.getElementById('goal-c').value) || 100, 
-                f: parseInt(document.getElementById('goal-f').value) || 50 
+                cal: parseInt(document.getElementById('goal-cal').value), 
+                p: parseInt(document.getElementById('goal-p').value), 
+                c: parseInt(document.getElementById('goal-c').value), 
+                f: parseInt(document.getElementById('goal-f').value) 
             };
-            db.ref('users/' + currentUser + '/goals').set(userData[currentUser].goals);
+            db.ref('users/' + currentUser).set(userData[currentUser]);
             document.getElementById('goal-panel').style.display = 'none';
         }
 
-        function clearData() { if(confirm("Reset logs?")) { 
-            userData[currentUser].history = (userData[currentUser].history || []).filter(m => m.date !== new Date().toLocaleDateString()); 
-            db.ref('users/' + currentUser + '/history').set(userData[currentUser].history); 
-        } }
+        function toggleOverlay(show) { 
+            document.getElementById('overlay-view').style.display = show ? 'block' : 'none'; 
+            if(show) renderReport();
+        }
+
+        function renderReport() {
+            const chart = document.getElementById('weekly-chart');
+            const u = userData[currentUser];
+            const dates = [];
+            for(let i=6; i>=0; i--) {
+                const d = new Date(); d.setDate(d.getDate() - i);
+                dates.push(d.toLocaleDateString());
+            }
+            chart.innerHTML = dates.map(d => {
+                let daySum = 0;
+                if(u.history) u.history.forEach(h => { if(h.date === d) daySum += (h.cal * h.scale); });
+                const h = Math.min(100, (daySum / u.goals.cal) * 100);
+                return `<div style="display:flex; flex-direction:column; align-items:center; flex:1;">
+                    <div class="chart-bar" style="height:${h * 1.2}px; background:${daySum > u.goals.cal ? '#f43f5e' : 'var(--primary)'}"></div>
+                    <span style="font-size:8px; color:var(--gray); margin-top:5px;">${d.split('/')[0]}/${d.split('/')[1]}</span>
+                </div>`;
+            }).join('');
+        }
+
+        function updateInsights(tots, goals) {
+            const diff = goals.cal - tots.cal;
+            let msg = "";
+            if(diff > 500) msg = `You have <b>${Math.round(diff)} kcal</b> left. A high-protein snack would help hit your ${goals.p}g target!`;
+            else if (diff > 0) msg = "Almost there! Keep an eye on the fats to stay within limits.";
+            else msg = "Goal reached! Great job tracking today. Focus on hydration now.";
+            document.getElementById('daily-insight').innerHTML = msg;
+        }
     </script>
 </body>
 </html>
