@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MacroTrack: Viv & Avi</title>
-    <script src="[https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js](https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js)"></script>
-    <script src="[https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js](https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js)"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
     <style>
         :root { --primary: #4f46e5; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; --gray: #64748b; --border: #e2e8f0; --p-color: #6366f1; --c-color: #10b981; --f-color: #f59e0b; }
         body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 12px; padding-bottom: 90px; }
@@ -31,7 +33,7 @@
         .quick-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; }
         .quick-btn { background: white; border: 1px solid var(--border); padding: 8px 4px; border-radius: 12px; font-size: 10px; font-weight: 600; cursor: pointer; text-align: center; }
         #overlay-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 2000; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .chart-container { display: flex; align-items: flex-end; justify-content: space-around; height: 120px; margin: 20px 0 70px 0; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
+        .chart-container { display: flex; align-items: flex-end; justify-content: space-around; height: 120px; margin: 20px 0 80px 0; border-bottom: 2px solid var(--border); padding-bottom: 10px; }
         .chart-bar { width: 25px; background: var(--primary); border-radius: 4px 4px 0 0; min-height: 2px; position: relative; }
         .bar-label { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: bold; color: var(--text); }
         .macro-labels { position: absolute; bottom: -65px; left: 50%; transform: translateX(-50%); font-size: 8px; white-space: nowrap; line-height: 1.2; text-align: center; }
@@ -54,10 +56,10 @@
         <div class="card" style="width:85%; max-width:400px;">
             <h3 style="margin-top:0">Daily Targets</h3>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                <div><small>Calories</small><input type="number" id="goal-cal" style="width:90%; padding:8px;"></div>
-                <div><small>Protein (g)</small><input type="number" id="goal-p" style="width:90%; padding:8px;"></div>
-                <div><small>Carbs (g)</small><input type="number" id="goal-c" style="width:90%; padding:8px;"></div>
-                <div><small>Fats (g)</small><input type="number" id="goal-f" style="width:90%; padding:8px;"></div>
+                <div><small>Calories</small><input type="number" id="goal-cal" value="2000" style="width:90%; padding:8px;"></div>
+                <div><small>Protein (g)</small><input type="number" id="goal-p" value="150" style="width:90%; padding:8px;"></div>
+                <div><small>Carbs (g)</small><input type="number" id="goal-c" value="200" style="width:90%; padding:8px;"></div>
+                <div><small>Fats (g)</small><input type="number" id="goal-f" value="70" style="width:90%; padding:8px;"></div>
             </div>
             <button class="btn-main" onclick="updateGoals()">Save Targets</button>
             <button onclick="document.getElementById('goal-panel').style.display='none'" style="width:100%; border:none; background:none; margin-top:10px; color:var(--gray)">Close</button>
@@ -77,12 +79,12 @@
     <div class="card">
         <form onsubmit="event.preventDefault(); processInput(false);">
             <div class="meal-selector">
-                <input type="radio" name="meal" id="r-br" value="Breakfast" onchange="updateQuickAdd()"><label for="r-br">Breakfast</label>
-                <input type="radio" name="meal" id="r-lu" value="Lunch" checked onchange="updateQuickAdd()"><label for="r-lu">Lunch</label>
-                <input type="radio" name="meal" id="r-di" value="Dinner" onchange="updateQuickAdd()"><label for="r-di">Dinner</label>
-                <input type="radio" name="meal" id="r-sn" value="Snack" onchange="updateQuickAdd()"><label for="r-sn">Snack</label>
+                <input type="radio" name="meal" id="r-br" value="Breakfast" onchange="updateQuickAdd()"><label for="r-br">BRKFST</label>
+                <input type="radio" name="meal" id="r-lu" value="Lunch" checked onchange="updateQuickAdd()"><label for="r-lu">LUNCH</label>
+                <input type="radio" name="meal" id="r-di" value="Dinner" onchange="updateQuickAdd()"><label for="r-di">DINNER</label>
+                <input type="radio" name="meal" id="r-sn" value="Snack" onchange="updateQuickAdd()"><label for="r-sn">SNACK</label>
             </div>
-            <input type="text" id="foodInput" placeholder="2 eggs, coffee, rice chicken...">
+            <input type="text" id="foodInput" placeholder="What did you eat?">
             <div style="display:flex; gap:10px; margin-top:12px;">
                 <input type="file" id="camInput" accept="image/*" capture="environment" style="display:none" onchange="processInput(true)">
                 <button type="button" class="btn-main btn-cam" style="flex:1; margin:0" onclick="document.getElementById('camInput').click()">📷 Photo</button>
@@ -109,10 +111,11 @@
     <script>
         const GEMINI_KEY = 'AIzaSyCo-DzOTyI0mvigIE4Ru86Ov4TKhVAoFFU';
 
+        // Firebase Setup
         const firebaseConfig = {
             apiKey: "AIzaSyAFsD_ryAIQ_bZPgLBaCwgX_-_hs6Vc388",
             authDomain: "macrotrack-42d94.firebaseapp.com",
-            databaseURL: "[https://macrotrack-42d94-default-rtdb.firebaseio.com](https://macrotrack-42d94-default-rtdb.firebaseio.com)",
+            databaseURL: "https://macrotrack-42d94-default-rtdb.firebaseio.com",
             projectId: "macrotrack-42d94",
             storageBucket: "macrotrack-42d94.firebasestorage.app",
             messagingSenderId: "1081766952227",
@@ -125,10 +128,10 @@
         let userData = {};
 
         const QUICK_MEALS = {
-            'Breakfast': [ {n:'Egg', i:'🥚', p:6, c:1, f:5, cal:70}, {n:'Idli', i:'⚪', p:2, c:15, f:0, cal:60}, {n:'Dosa', i:'🥞', p:3, c:25, f:4, cal:150}, {n:'Poori', i:'🥯', p:2, c:18, f:8, cal:150} ],
-            'Lunch': [ {n:'Rice', i:'🍚', p:3, c:45, f:0, cal:200}, {n:'Poriyal', i:'🥗', p:2, c:10, f:5, cal:100}, {n:'Chicken curry', i:'🍗', p:25, c:5, f:12, cal:250}, {n:'Curd', i:'🥣', p:4, c:5, f:4, cal:100} ],
-            'Dinner': [ {n:'Protein shake', i:'🥤', p:25, c:3, f:1, cal:120}, {n:'Chapati', i:'🫓', p:3, c:18, f:1, cal:90}, {n:'Paneer fry', i:'🧀', p:18, c:4, f:20, cal:280}, {n:'Curd', i:'🥣', p:4, c:5, f:4, cal:100} ],
-            'Snack': [ {n:'Whey', i:'🥛', p:25, c:2, f:1, cal:120}, {n:'Yogurt', i:'🍧', p:8, c:12, f:0, cal:80}, {n:'Almond', i:'🥜', p:6, c:6, f:14, cal:160}, {n:'Protein bar', i:'🍫', p:20, c:25, f:7, cal:220} ]
+            'Breakfast': [ {n:'Whey', i:'🥤', p:25, c:3, f:1, cal:120}, {n:'Coffee', i:'☕', p:0, c:2, f:2, cal:30}, {n:'Egg', i:'🥚', p:6, c:1, f:5, cal:70}, {n:'Apple', i:'🍎', p:0, c:25, f:0, cal:95} ],
+            'Lunch': [ {n:'Rice', i:'🍚', p:3, c:45, f:0, cal:200}, {n:'Chicken', i:'🍗', p:25, c:0, f:10, cal:200}, {n:'Salad', i:'🥗', p:1, c:5, f:0, cal:25}, {n:'Curd', i:'🥣', p:4, c:5, f:4, cal:100} ],
+            'Dinner': [ {n:'Paneer', i:'🧀', p:15, c:4, f:20, cal:250}, {n:'Chapati', i:'🫓', p:3, c:18, f:1, cal:90}, {n:'Dal', i:'🥣', p:7, c:20, f:5, cal:150}, {n:'Fish', i:'🐟', p:22, c:0, f:8, cal:170} ],
+            'Snack': [ {n:'Nuts', i:'🥜', p:6, c:6, f:14, cal:160}, {n:'Yogurt', i:'🍧', p:10, c:15, f:0, cal:100}, {n:'Banana', i:'🍌', p:1, c:27, f:0, cal:105}, {n:'Bar', i:'🍫', p:20, c:25, f:7, cal:220} ]
         };
 
         db.ref('users').on('value', (snap) => { userData = snap.val() || {}; renderUI(); });
@@ -147,7 +150,9 @@
             if(!text && !isPhoto) return;
 
             document.getElementById('loader').style.display = 'block';
-            const models = ['gemini-1.5-flash', 'gemini-1.5-pro']; // High reliability for 2026
+            
+            // Try different fallback models for 2026
+            const models = ['gemini-1.5-flash', 'gemini-1.5-pro']; 
             let success = false;
             let lastErr = "";
 
@@ -155,8 +160,7 @@
                 if (success) break;
                 try {
                     const url = `https://generativelanguage.googleapis.com/v1beta/models/${mName}:generateContent?key=${GEMINI_KEY}`;
-                    let prompt = `Return JSON ONLY: {"name":"Item","p":number,"c":number,"f":number,"cal":number}. Estimate for: ${text || 'food image'}`;
-                    let contents = [{ parts: [{ text: prompt }] }];
+                    let contents = [{ parts: [{ text: `Respond with JSON only: {"name":"Item","p":number,"c":number,"f":number,"cal":number}. Estimate for: ${text || 'food image'}` }] }];
 
                     if (isPhoto && file) {
                         const b64 = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result.split(',')[1]); rd.readAsDataURL(file); });
@@ -174,11 +178,16 @@
                             saveMeal(json.name, json.p, json.c, json.f, json.cal, type);
                             success = true;
                         }
-                    } else if (data.error) { lastErr = data.error.message; }
+                    } else if (data.error) { 
+                        lastErr = `${data.error.code}: ${data.error.message}`;
+                    }
                 } catch (e) { lastErr = e.message; }
             }
 
-            if(!success) alert("AI Error: " + lastErr);
+            if(!success) {
+                console.error("AI Error Detail:", lastErr);
+                alert("AI Processing Failed. If it says '403 Forbidden', please ensure 'Generative Language API' is enabled in your Google Cloud Console.");
+            }
             document.getElementById('foodInput').value = '';
             document.getElementById('loader').style.display = 'none';
         }
@@ -217,7 +226,7 @@
             });
 
             const todayList = history.filter(m => m.date === today);
-            document.getElementById('history-list').innerHTML = todayList.length === 0 ? `<p style="text-align:center; color:gray; padding:20px;">No meals logged yet.</p>` :
+            document.getElementById('history-list').innerHTML = todayList.length === 0 ? `<p style="text-align:center; color:gray; padding:20px;">No meals logged today.</p>` :
                 todayList.map(m => `
                 <div class="history-item">
                     <div>
@@ -232,7 +241,6 @@
                     </div>
                 </div>`).join('');
             updateQuickAdd();
-            updateInsights(tots, g);
         }
 
         function updateScale(id, delta) {
@@ -266,15 +274,9 @@
                         <span style="color:var(--c-color)">C:${Math.round(s.c)}</span><br>
                         <span style="color:var(--f-color)">F:${Math.round(s.f)}</span>
                     </div>
-                    <span style="position:absolute; bottom:-90px; left:50%; transform:translateX(-50%); font-size:8px; color:var(--gray); font-weight:bold;">${d.split('/')[0]}/${d.split('/')[1]}</span>
+                    <span style="position:absolute; bottom:-100px; left:50%; transform:translateX(-50%); font-size:8px; color:var(--gray); font-weight:bold;">${d.split('/')[0]}/${d.split('/')[1]}</span>
                 </div>`;
             }).join('');
-        }
-
-        function updateInsights(tots, goals) {
-            const diff = goals.cal - tots.cal;
-            let msg = diff > 500 ? `Left: <b>${Math.round(diff)} kcal</b>. Eat more protein!` : (diff > 0 ? "On track!" : "Goal met!");
-            document.getElementById('daily-insight').innerHTML = msg;
         }
 
         function clearData() { if(confirm("Reset logs?")) { userData[currentUser].history = (userData[currentUser].history || []).filter(m => m.date !== new Date().toLocaleDateString()); db.ref('users/' + currentUser + '/history').set(userData[currentUser].history); } }
