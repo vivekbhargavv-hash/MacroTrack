@@ -129,11 +129,67 @@
         });
 
         function switchUser(name) {
-            currentUser = name;
-            document.querySelectorAll('.profile-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('btn-' + name).classList.add('active');
-            renderUI();
-        }
+    currentUser = name;
+    
+    // 1. Update button visuals
+    document.querySelectorAll('.profile-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('btn-' + name).classList.add('active');
+    
+    // 2. Clear the history list immediately so old data doesn't linger
+    document.getElementById('history-list').innerHTML = '<p style="text-align:center; color:gray;">Loading ' + name + '\'s data...</p>';
+    
+    // 3. Force a fresh render from the database
+    renderUI();
+}
+
+function renderUI() {
+    // Ensure the user exists in our local data object
+    if (!userData[currentUser]) {
+        userData[currentUser] = { history: [], goals: {p:100, c:150, f:50, cal:1500} };
+    }
+
+    const u = userData[currentUser];
+    const today = new Date().toLocaleDateString();
+    
+    // Reset totals
+    let tots = {p:0, c:0, f:0, cal:0};
+    
+    // Calculate totals only for the current user's history
+    if(u.history && Array.isArray(u.history)) {
+        u.history.forEach(m => { 
+            if(m.date === today) {
+                ['p','c','f','cal'].forEach(k => { tots[k] += (m[k] * (m.scale || 1)); });
+            }
+        });
+    }
+
+    // Update the Dashboard
+    document.getElementById('user-display').innerText = currentUser.toUpperCase();
+    const progressWidth = u.goals ? Math.min(100, (tots.cal / u.goals.cal) * 100) : 0;
+    document.getElementById('cal-bar').style.width = progressWidth + '%';
+    document.getElementById('cal-text').innerText = Math.round(tots.cal) + ' / ' + (u.goals ? u.goals.cal : 2000);
+    
+    ['p','c','f'].forEach(k => {
+        const val = Math.round(tots[k]);
+        document.getElementById(`tot-${k}`).innerText = val + 'g';
+    });
+
+    // Filter and show history
+    const list = u.history ? u.history.filter(m => m.date === today) : [];
+    if (list.length === 0) {
+        document.getElementById('history-list').innerHTML = '<p style="text-align:center; color:gray; margin-top:20px;">No meals logged today for ' + currentUser + '</p>';
+    } else {
+        document.getElementById('history-list').innerHTML = list.map(m => `
+            <div class="history-item">
+                <div><b>${m.name}</b><br><small>${m.type} • ${Math.round(m.cal * (m.scale || 1))} kcal</small></div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <button class="qty-btn" onclick="updateScale(${m.id}, -0.5)">-</button>
+                    <b>${m.scale || 1}</b>
+                    <button class="qty-btn" onclick="updateScale(${m.id}, 0.5)">+</button>
+                </div>
+            </div>`).join('');
+    }
+}
 
         async function processInput(isPhoto) {
             const text = document.getElementById('foodInput').value;
