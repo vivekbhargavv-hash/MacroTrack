@@ -173,36 +173,81 @@
         }
 
         async function processInput(isPhoto) {
-            checkApiKey(); if (!GEMINI_KEY) return;
-            const text = document.getElementById('foodInput').value;
-            const file = document.getElementById('camInput').files[0];
-            const type = document.querySelector('input[name="meal"]:checked').value;
-            if(!text && !isPhoto) return;
-            document.getElementById('loader').style.display = 'block';
-            const models = ['gemini-3-flash', 'gemini-2.5-flash'];
-            let success = false;
-            for (const mName of models) {
-                if (success) break;
-                try {
-                    const url = `https://generativelanguage.googleapis.com/v1/models/${mName}:generateContent?key=${GEMINI_KEY}`;
-                    let contents = [{ parts: [{ text: `Return JSON only: {"name":"Item","p":number,"c":number,"f":number,"cal":number}. Estimate: ${text || 'image'}` }] }];
-                    if (isPhoto && file) {
-                        const b64 = await new Promise(r => { const rd = new FileReader(); rd.onload = () => r(rd.result.split(',')[1]); rd.readAsDataURL(file); });
-                        contents[0].parts.push({ inline_data: { mime_type: file.type, data: b64 } });
-                    }
-                    const resp = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents }) });
-                    const data = await resp.json();
-                    if (data.candidates?.[0]?.content?.parts?.[0]?.text) {
-                        const json = JSON.parse(data.candidates[0].content.parts[0].text.match(/\{.*\}/s)[0]);
-                        saveMeal(json.name, json.p, json.c, json.f, json.cal, type);
-                        success = true;
-                    }
-                } catch (e) { console.error(e); }
+            checkApiKey(); 
+    if (!GEMINI_KEY) return;
+    
+    const text = document.getElementById('foodInput').value;
+    const file = document.getElementById('camInput').files[0];
+    const type = document.querySelector('input[name="meal"]:checked').value;
+    if(!text && !isPhoto) return;
+
+    document.getElementById('loader').style.display = 'block';
+    
+    // Ordered specifically by your preference
+    const models = [
+        'gemini-2.5-flash',       // 1. First Priority
+        'gemini-3-flash-preview', // 2. Second Priority
+        'gemini-2.5-flash-lite'   // 3. Third Priority
+    ]; 
+    
+    let success = false;
+    let errorLog = "";
+
+    for (const mName of models) {
+        if (success) break;
+
+        try {
+            // Using v1beta for widest model compatibility
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${mName}:generateContent?key=${GEMINI_KEY}`;
+            
+            let contents = [{ 
+                parts: [{ text: `Return JSON only: {"name":"ItemName","p":number,"c":number,"f":number,"cal":number}. Estimate nutrition for: ${text || 'the food in this image'}` }] 
+            }];
+
+            if (isPhoto && file) {
+                const b64 = await new Promise(r => { 
+                    const rd = new FileReader(); 
+                    rd.onload = () => r(rd.result.split(',')[1]); 
+                    rd.readAsDataURL(file); 
+                });
+                contents[0].parts.push({ 
+                    inline_data: { mime_type: file.type, data: b64 } 
+                });
             }
-            if(!success) alert("AI failed.");
-            document.getElementById('foodInput').value = '';
-            document.getElementById('loader').style.display = 'none';
+
+            const resp = await fetch(url, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ contents }) 
+            });
+
+            const data = await resp.json();
+            
+            if (data.candidates && data.candidates[0].content.parts[0].text) {
+                const rawText = data.candidates[0].content.parts[0].text;
+                // Robust JSON extraction
+                const jsonMatch = rawText.match(/\{.*\}/s);
+                if (jsonMatch) {
+                    const json = JSON.parse(jsonMatch[0]);
+                    saveMeal(json.name, json.p, json.c, json.f, json.cal, type);
+                    success = true;
+                    console.log(`Success! Managed to use: ${mName}`);
+                }
+            } else if (data.error) {
+                errorLog += `- ${mName}: ${data.error.message}\n`;
+            }
+        } catch (e) { 
+            errorLog += `- ${mName} System Error: ${e.message}\n`;
         }
+    }
+
+    if(!success) {
+        alert("AI analysis failed across all available models.\n\nStatus:\n" + errorLog);
+    }
+    
+    document.getElementById('foodInput').value = '';
+    document.getElementById('loader').style.display = 'none';
+}
 
         function saveMeal(name, p, c, f, cal, type) {
             if(!userData[currentUser]) userData[currentUser] = { history: [], goals: {p:150, c:200, f:70, cal:2000} };
