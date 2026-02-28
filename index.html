@@ -181,8 +181,6 @@
         
         const models = ['gemini-2.5-flash', 'gemini-3-flash-preview', 'gemini-2.5-flash-lite']; 
         let success = false;
-        let errorLog = "";
-
         for (const mName of models) {
             if (success) break;
             try {
@@ -203,9 +201,9 @@
                         success = true;
                     }
                 }
-            } catch (e) { errorLog += `${mName} Error; `; }
+            } catch (e) { console.warn(`Skipping ${mName}`); }
         }
-        if(!success) alert("AI failed. Tips: Check internet or API key.");
+        if(!success) alert("AI failed. Check API key or quota.");
         document.getElementById('foodInput').value = '';
         document.getElementById('loader').style.display = 'none';
     }
@@ -218,20 +216,15 @@
         db.ref('users/' + currentUser).set(userData[currentUser]);
     }
 
-    // --- REPLACEMENT RENDER LOGIC (AUTO-RESET & COACH) ---
     function renderUI() {
         const u = userData[currentUser] || { history: [], goals: {p:150, c:200, f:70, cal:2000} };
         const today = new Date().toLocaleDateString();
         let tots = {p:0, c:0, f:0, cal:0};
         const history = u.history || [];
-        
-        // AUTO-RESET: Only filter items that match today's date for the dashboard
         const todayEntries = history.filter(m => m.date === today);
         
         todayEntries.forEach(m => {
-            ['p','c','f','cal'].forEach(k => {
-                tots[k] += (Number(m[k]) * (Number(m.scale) || 1));
-            });
+            ['p','c','f','cal'].forEach(k => { tots[k] += (Number(m[k]) * (Number(m.scale) || 1)); });
         });
         
         document.getElementById('user-display').innerText = currentUser.toUpperCase();
@@ -244,10 +237,8 @@
             document.getElementById(`bar-${k}`).style.width = Math.min(100, (consumed / g[k]) * 100) + '%';
         });
 
-        // Smart Warnings
         renderCoach(tots, g);
 
-        // Render History (Only Today's)
         document.getElementById('history-list').innerHTML = todayEntries.length === 0 ? 
             `<p style="text-align:center; color:gray; padding:20px;">No meals logged for ${today}.</p>` :
             todayEntries.map(m => `
@@ -263,27 +254,95 @@
                         <button class="qty-btn" onclick="updateScale(${m.id}, 0.5)">+</button>
                     </div>
                 </div>`).join('');
-        
         updateQuickAdd();
     }
 
     function renderCoach(tots, g) {
-        const el = document.getElementById('daily-insight'); // Reusing insight box
+        const el = document.getElementById('daily-insight');
         if(tots.cal === 0) { el.style.display = "none"; return; }
         el.style.display = "block";
 
         const remCal = g.cal - tots.cal;
         const remP = g.p - tots.p;
+        const remC = g.c - tots.c;
+        const remF = g.f - tots.f;
 
-        if (remP > 20 && remCal < 300) {
-            el.innerHTML = `⚠️ <b>Coach:</b> High Protein needed! You have ${Math.round(remP)}g left but only ${Math.round(remCal)} kcal. Go for egg whites or a shake.`;
-            el.style.background = "#fff7ed"; el.style.borderColor = "#f97316";
-        } else if (tots.cal > g.cal) {
-            el.innerHTML = `🛑 <b>Coach:</b> Calorie limit reached. Stick to water and greens for the rest of the night.`;
-        } else {
-            el.innerHTML = `✅ <b>Coach:</b> Doing great! You have ${Math.round(remCal)} kcal and ${Math.round(remP)}g protein remaining.`;
-            el.style.background = "#eff6ff"; el.style.borderColor = "#4f46e5";
+        let advice = "";
+        let theme = { bg: "#eff6ff", border: "#4f46e5" }; // Default Blue
+
+        // 1. CRITICAL: Calorie Overrun
+        if (tots.cal > g.cal) {
+            advice = `🛑 <b>Limit Reached:</b> You are ${Math.round(tots.cal - g.cal)} kcal over. Stick to zero-calorie drinks and high-fiber greens (spinach/cucumber) for the rest of the day.`;
+            theme = { bg: "#fef2f2", border: "#ef4444" };
+        } 
+        // 2. CRITICAL: Protein Gap + Low Calorie Buffer
+        else if (remP > 25 && remCal < 400) {
+            advice = `⚠️ <b>Protein Emergency:</b> You need ${Math.round(remP)}g protein but only have ${Math.round(remCal)} kcal left. <b>Avoid all fats/carbs.</b> Stick to egg whites, white fish, or a double-scoop whey shake.`;
+            theme = { bg: "#fff7ed", border: "#f97316" };
         }
+        // 3. CARB ADVISOR: High Carbs Remaining
+        else if (remC > (g.c * 0.5) && remCal > 500) {
+            advice = `🔋 <b>Fuel Up:</b> You have a large carb budget left (${Math.round(remC)}g). This is a great time for oats, brown rice, or sweet potato to fuel your next workout.`;
+        }
+        // 4. CARB ADVISOR: Low Carb Buffer (Ketogenic advice)
+        else if (remC < 15 && remCal > 300) {
+            advice = `🥩 <b>Carb Ceiling Hit:</b> You've used your carbs. For your next meal, focus on "fats + protein" like paneer, avocado, or nuts to stay within limits.`;
+            theme = { bg: "#f0fdf4", border: "#22c55e" };
+        }
+        // 5. BALANCED PROGRESS
+        else {
+            advice = `⚖️ <b>Balanced:</b> You're doing well. Aim for a final meal with approx. <b>${Math.max(0, Math.round(remP))}g Protein</b> and <b>${Math.max(0, Math.round(remC))}g Carbs</b> to land perfectly on your targets.`;
+        }
+
+        el.innerHTML = advice;
+        el.style.background = theme.bg;
+        el.style.borderColor = theme.border;
+    }
+
+    function renderReport() {
+        const chart = document.getElementById('weekly-chart');
+        const u = userData[currentUser] || { history: [], goals: {p:150, c:200, f:70, cal:2000} };
+        const dates = [];
+        for(let i=6; i>=0; i--) { const d = new Date(); d.setDate(d.getDate() - i); dates.push(d.toLocaleDateString()); }
+        
+        let totalCal = 0, pMetCount = 0, daysLogged = 0;
+        let dailyStats = [];
+
+        chart.innerHTML = dates.map(d => {
+            let s = {p:0, c:0, f:0, cal:0};
+            if(u.history) { u.history.forEach(h => { if(h.date === d) { s.cal += (h.cal * h.scale); s.p += (h.p * h.scale); s.c += (h.c * h.scale); s.f += (h.f * h.scale); } }); }
+            if (s.cal > 0) {
+                daysLogged++; totalCal += s.cal;
+                if(s.p >= u.goals.p * 0.9) pMetCount++;
+                dailyStats.push({date: d, ...s});
+            }
+            const h = Math.min(100, (s.cal / u.goals.cal) * 100);
+            return `<div class="chart-bar ${s.cal > 0 && s.cal <= u.goals.cal ? 'goal-met' : ''}" style="height:${h * 1.2}px"><span class="bar-label">${Math.round(s.cal)}</span><span style="position:absolute; bottom:-25px; left:50%; transform:translateX(-50%); font-size:9px; color:var(--gray);">${d.split('/')[0]}/${d.split('/')[1]}</span></div>`;
+        }).join('');
+
+        let verdict = daysLogged === 0 ? "No data to analyze yet." : "";
+        if (daysLogged > 0) {
+            const avgCal = totalCal / daysLogged;
+            const pRatio = pMetCount / daysLogged;
+            if (pRatio >= 0.8) verdict = "<b>Elite Consistency!</b> You're hitting protein targets almost daily. Keep this up!";
+            else if (avgCal > u.goals.cal * 1.1) verdict = "<b>Caloric Surplus:</b> You're averaging " + Math.round(avgCal) + " kcal. Trim portions next week if weight loss is the goal.";
+            else if (pRatio < 0.4) verdict = "<b>Protein Deficit:</b> Swapping one carb snack for a protein shake would make a huge difference.";
+            else verdict = "<b>Steady Progress:</b> Your averages look stable. Fine-tune your protein timing!";
+            
+            const weekends = dailyStats.filter(s => { const day = new Date(s.date).getDay(); return day === 0 || day === 6; });
+            const wkndAvg = weekends.reduce((acc, curr) => acc + curr.cal, 0) / (weekends.length || 1);
+            if (weekends.length > 0 && wkndAvg > avgCal * 1.2) verdict += "<br><br>⚠️ <b>Weekend Spike:</b> Calories jump on weekends, which might stall progress.";
+        }
+
+        let dailyHtml = `<h3 style="margin-top:25px; font-size:15px; border-top:1px solid #eee; padding-top:15px;">Daily Deep Dive</h3>`;
+        dailyStats.reverse().forEach(s => {
+            const icon = (s.p >= u.goals.p * 0.9) ? '✅' : '📉';
+            dailyHtml += `<div class="history-item" style="display:block; font-size:12px; margin-bottom:10px;"><b>${s.date}</b>: ${Math.round(s.cal)} kcal<br><span style="color:#64748b;">P: ${Math.round(s.p)}g ${icon} | C: ${Math.round(s.c)}g | F: ${Math.round(s.f)}g</span></div>`;
+        });
+
+        document.getElementById('score-avg').innerText = `Avg: ${Math.round(totalCal/7)} kcal`;
+        document.getElementById('score-protein').innerText = `Protein: ${Math.round((pMetCount/7)*100)}%`;
+        document.getElementById('weekly-insights-list').innerHTML = `<div class="insight-box" style="background:#eff6ff; border-color:#3b82f6; margin-bottom:15px;"><b>Coach's Verdict:</b><br>${verdict}</div>${dailyHtml}`;
     }
 
     function updateScale(id, delta) {
@@ -299,78 +358,6 @@
     }
 
     function toggleOverlay(show) { document.getElementById('overlay-view').style.display = show ? 'block' : 'none'; if(show) renderReport(); }
-
-    function renderReport() {
-    const chart = document.getElementById('weekly-chart');
-    const u = userData[currentUser] || { history: [], goals: {p:150, c:200, f:70, cal:2000} };
-    const dates = [];
-    for(let i=6; i>=0; i--) { 
-        const d = new Date(); 
-        d.setDate(d.getDate() - i); 
-        dates.push(d.toLocaleDateString()); 
-    }
-    
-    let totalCal = 0, pMetCount = 0;
-    let dailyBreakdownHtml = `<h3 style="margin-top:25px; font-size:16px;">Daily Macro Breakdown</h3>`;
-
-    chart.innerHTML = dates.map(d => {
-        let s = {p:0, c:0, f:0, cal:0};
-        if(u.history) {
-            u.history.forEach(h => { 
-                if(h.date === d) { 
-                    s.cal += (h.cal * h.scale); 
-                    s.p += (h.p * h.scale); 
-                    s.c += (h.c * h.scale); 
-                    s.f += (h.f * h.scale); 
-                } 
-            });
-        }
-        
-        if(s.p >= u.goals.p * 0.9) pMetCount++; // Count as met if within 10%
-        totalCal += s.cal;
-        
-        // Build the daily list item
-        if (s.cal > 0) {
-            const getStatus = (val, goal) => {
-                const diff = val / goal;
-                if (diff >= 0.9 && diff <= 1.1) return '✅';
-                if (diff >= 0.75) return '⚠️';
-                return '🛑';
-            };
-
-            dailyBreakdownHtml += `
-            <div class="history-item" style="display:block; font-size:12px; margin-bottom:10px;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                    <b>${d === new Date().toLocaleDateString() ? 'Today' : d}</b>
-                    <span style="font-weight:bold; color:var(--primary)">${Math.round(s.cal)} / ${u.goals.cal} kcal</span>
-                </div>
-                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:5px; text-align:center;">
-                    <div style="background:#f1f5f9; padding:4px; border-radius:8px;">P: ${Math.round(s.p)}g ${getStatus(s.p, u.goals.p)}</div>
-                    <div style="background:#f1f5f9; padding:4px; border-radius:8px;">C: ${Math.round(s.c)}g ${getStatus(s.c, u.goals.c)}</div>
-                    <div style="background:#f1f5f9; padding:4px; border-radius:8px;">F: ${Math.round(s.f)}g ${getStatus(s.f, u.goals.f)}</div>
-                </div>
-            </div>`;
-        }
-
-        const h = Math.min(100, (s.cal / u.goals.cal) * 100);
-        return `<div class="chart-bar ${s.cal > 0 && s.cal <= u.goals.cal ? 'goal-met' : ''}" style="height:${h * 1.2}px">
-            <span class="bar-label">${Math.round(s.cal)}</span>
-            <span style="position:absolute; bottom:-25px; left:50%; transform:translateX(-50%); font-size:9px; color:var(--gray);">${d.split('/')[0]}/${d.split('/')[1]}</span>
-        </div>`;
-    }).join('');
-
-    document.getElementById('score-avg').innerText = `Avg: ${Math.round(totalCal/7)} kcal`;
-    document.getElementById('score-protein').innerText = `Protein Consistency: ${Math.round((pMetCount/7)*100)}%`;
-    
-    // Inject the daily breakdown below the chart
-    document.getElementById('weekly-insights-list').innerHTML = `
-        <div class="insight-box" style="background:#f0fdf4; border-color:#22c55e; margin-bottom:15px;">
-            <b>Weekly Summary:</b><br>- Protein goals met: ${pMetCount}/7 days.<br>
-            ${pMetCount < 4 ? "💡 Aim for more protein early in the day." : "🚀 Great job on protein targets!"}
-        </div>
-        ${dailyBreakdownHtml}
-    `;
-}
 
     function clearData() { if(confirm("Reset logs?")) { userData[currentUser].history = (userData[currentUser].history || []).filter(m => m.date !== new Date().toLocaleDateString()); db.ref('users/' + currentUser + '/history').set(userData[currentUser].history); } }
 </script>
