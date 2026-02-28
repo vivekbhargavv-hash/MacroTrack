@@ -305,7 +305,15 @@
         
         // Helper to format date as "dd-mmm" (e.g., 28-Feb)
         const formatShortDate = (dateStr) => {
-            const d = new Date(dateStr);
+            // Split "28/02/2026" into parts to avoid browser-specific parsing errors
+            const parts = dateStr.split('/');
+            if (parts.length !== 3) return dateStr; // Fallback if format is weird
+            
+            // Create date object (Month is 0-indexed, so we subtract 1)
+            const d = new Date(parts[2], parts[1] - 1, parts[0]);
+            
+            if (isNaN(d.getTime())) return dateStr; // Final safety check
+
             const day = d.getDate();
             const month = d.toLocaleString('default', { month: 'short' });
             return `${day}-${month}`;
