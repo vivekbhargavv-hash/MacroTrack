@@ -302,22 +302,48 @@
     function renderReport() {
         const chart = document.getElementById('weekly-chart');
         const u = userData[currentUser] || { history: [], goals: {p:150, c:200, f:70, cal:2000} };
+        
+        // Helper to format date as "dd-mmm" (e.g., 28-Feb)
+        const formatShortDate = (dateStr) => {
+            const d = new Date(dateStr);
+            const day = d.getDate();
+            const month = d.toLocaleString('default', { month: 'short' });
+            return `${day}-${month}`;
+        };
+
         const dates = [];
-        for(let i=6; i>=0; i--) { const d = new Date(); d.setDate(d.getDate() - i); dates.push(d.toLocaleDateString()); }
+        for(let i=6; i>=0; i--) { 
+            const d = new Date(); 
+            d.setDate(d.getDate() - i); 
+            dates.push(d.toLocaleDateString()); 
+        }
         
         let totalCal = 0, pMetCount = 0, daysLogged = 0;
         let dailyStats = [];
 
         chart.innerHTML = dates.map(d => {
             let s = {p:0, c:0, f:0, cal:0};
-            if(u.history) { u.history.forEach(h => { if(h.date === d) { s.cal += (h.cal * h.scale); s.p += (h.p * h.scale); s.c += (h.c * h.scale); s.f += (h.f * h.scale); } }); }
+            if(u.history) { 
+                u.history.forEach(h => { 
+                    if(h.date === d) { 
+                        s.cal += (h.cal * h.scale); 
+                        s.p += (h.p * h.scale); 
+                        s.c += (h.c * h.scale); 
+                        s.f += (h.f * h.scale); 
+                    } 
+                }); 
+            }
             if (s.cal > 0) {
                 daysLogged++; totalCal += s.cal;
                 if(s.p >= u.goals.p * 0.9) pMetCount++;
                 dailyStats.push({date: d, ...s});
             }
             const h = Math.min(100, (s.cal / u.goals.cal) * 100);
-            return `<div class="chart-bar ${s.cal > 0 && s.cal <= u.goals.cal ? 'goal-met' : ''}" style="height:${h * 1.2}px"><span class="bar-label">${Math.round(s.cal)}</span><span style="position:absolute; bottom:-25px; left:50%; transform:translateX(-50%); font-size:9px; color:var(--gray);">${d.split('/')[0]}/${d.split('/')[1]}</span></div>`;
+            // Updated Date Label in Chart
+            return `<div class="chart-bar ${s.cal > 0 && s.cal <= u.goals.cal ? 'goal-met' : ''}" style="height:${h * 1.2}px">
+                <span class="bar-label">${Math.round(s.cal)}</span>
+                <span style="position:absolute; bottom:-25px; left:50%; transform:translateX(-50%); font-size:9px; color:var(--gray); white-space:nowrap;">${formatShortDate(d)}</span>
+            </div>`;
         }).join('');
 
         let verdict = daysLogged === 0 ? "No data to analyze yet." : "";
@@ -325,7 +351,7 @@
             const avgCal = totalCal / daysLogged;
             const pRatio = pMetCount / daysLogged;
             if (pRatio >= 0.8) verdict = "<b>Elite Consistency!</b> You're hitting protein targets almost daily. Keep this up!";
-            else if (avgCal > u.goals.cal * 1.1) verdict = "<b>Caloric Surplus:</b> You're averaging " + Math.round(avgCal) + " kcal. Trim portions next week if weight loss is the goal.";
+            else if (avgCal > u.goals.cal * 1.1) verdict = "<b>Caloric Surplus:</b> You're averaging " + Math.round(avgCal) + " kcal. Trim portions next week.";
             else if (pRatio < 0.4) verdict = "<b>Protein Deficit:</b> Swapping one carb snack for a protein shake would make a huge difference.";
             else verdict = "<b>Steady Progress:</b> Your averages look stable. Fine-tune your protein timing!";
             
@@ -337,7 +363,11 @@
         let dailyHtml = `<h3 style="margin-top:25px; font-size:15px; border-top:1px solid #eee; padding-top:15px;">Daily Deep Dive</h3>`;
         dailyStats.reverse().forEach(s => {
             const icon = (s.p >= u.goals.p * 0.9) ? '✅' : '📉';
-            dailyHtml += `<div class="history-item" style="display:block; font-size:12px; margin-bottom:10px;"><b>${s.date}</b>: ${Math.round(s.cal)} kcal<br><span style="color:#64748b;">P: ${Math.round(s.p)}g ${icon} | C: ${Math.round(s.c)}g | F: ${Math.round(s.f)}g</span></div>`;
+            // Applied dd-mmm format in Daily Deep Dive list
+            dailyHtml += `<div class="history-item" style="display:block; font-size:12px; margin-bottom:10px;">
+                <b>${formatShortDate(s.date)}</b>: ${Math.round(s.cal)} kcal<br>
+                <span style="color:#64748b;">P: ${Math.round(s.p)}g ${icon} | C: ${Math.round(s.c)}g | F: ${Math.round(s.f)}g</span>
+            </div>`;
         });
 
         document.getElementById('score-avg').innerText = `Avg: ${Math.round(totalCal/7)} kcal`;
